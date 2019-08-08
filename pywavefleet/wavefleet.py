@@ -1,21 +1,12 @@
-from . import get_endpoint, get_token
+"""
+Classes for representing data grabbed from the api
+"""
 
 
-class WaveFleet:
-    def __init__(self):
-        self.token = get_token()
-        self.endpoint = get_endpoint()
+class Spotter:
+    def __init__(self, ):
 
-    def get_devices(self):
-        import json
-        import requests
-
-        headers = {'token': self.token, 'Content-Type': 'appication/json'}
-        data = json.loads(requests.get(self.endpoint + '/devices', headers=headers).text)
-
-        spotters = []
-        for device in data['data']['devices']:
-            # TODO: Check if actually valid?
-            spotters.append(device['spotterId'])
-
-        return spotters
+# TODO: Get devices (really called devices)
+# TODO: Latest data
+# TODO: Handle iso string vs python datatime
+# 
