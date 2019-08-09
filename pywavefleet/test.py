@@ -2,7 +2,7 @@ import sys; print('Python %s on %s' % (sys.version, sys.platform))
 sys.path.extend(['/Users/mikesosa/Documents/Sofar/wavefleet-client-python'])
 import json
 import requests
-from pywavefleet.utils import SofarApi
+from pywavefleet.api import SofarApi
 
 s = SofarApi()
 u1 = f"{s.endpoint}/history"
