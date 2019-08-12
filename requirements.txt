@@ -1,2 +1,5 @@
 python-dotenv
 requests
+
+# for development
+# pytest
