@@ -1,12 +1,11 @@
 import os
 import dotenv
+import requests
+import json
 
 # config values
-_endpoint = None
-_wavefleet_token = None
-
 userpath = os.path.expanduser("~")
-enviromentFile = os.path.join(userpath,'sofar_api.env')
+enviromentFile = os.path.join(userpath, 'sofar_api.env')
 dotenv.load_dotenv(enviromentFile)
 token = os.getenv('WF_API_TOKEN')
 
@@ -22,11 +21,35 @@ def get_endpoint():
     return _endpoint
 
 
-def time_stamp_to_epoch(date_string):
-    #
-    # 2019-03-11T22:09:01.000Z
-    #
-    import time
-    import calendar
+class SofarConnection:
+    """
+    Base Parent class for connections to the api
+    Use SofarApi in sofar.py in practice
+    """
+    def __init__(self):
+        self.token = get_token()
+        self.endpoint = get_endpoint()
+        self.header = {'token': self.token, 'Content-Type': 'application/json'}
 
-    return calendar.timegm(time.strptime(date_string, '%Y-%m-%dT%H:%M:%S.%fZ'))
+    # Helper methods
+    def _get(self, endpoint_suffix, params: dict = None):
+        url = f"{self.endpoint}/{endpoint_suffix}"
+
+        if params is None:
+            response = requests.get(url, headers=self.header)
+        else:
+            response = requests.get(url, headers=self.header, params=params)
+
+        status = response.status_code
+        data = json.loads(response.text)
+
+        return status, data
+
+    def _post(self, endpoint_suffix, json_data):
+        response = requests.get(f"{self.endpoint}/{endpoint_suffix}",
+                                json=json_data,
+                                headers=self.header)
+        status = response.status_code
+        data = json.loads(response.text)
+
+        return status, data

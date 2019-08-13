@@ -1,8 +1,7 @@
 """
 Classes for representing devices and data grabbed from the api
 """
-from pywavefleet.sofar import SofarApi
-from pywavefleet.query import Query
+from pywavefleet.sofar import SofarApi, Query
 
 
 # --------------------- Devices ----------------------------------------------#
