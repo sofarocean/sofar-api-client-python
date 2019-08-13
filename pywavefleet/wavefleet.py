@@ -159,7 +159,4 @@ class Spotter:
 
 
 
-# TODO: Get devices (really called devices)
 # TODO: Latest data
-# TODO: Handle iso string vs python datatime
-# 

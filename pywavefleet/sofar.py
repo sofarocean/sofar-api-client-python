@@ -22,6 +22,7 @@ class SofarApi(SofarConnection):
         :param end_date: The end date of the data to be included
         :return: None if not completed, else the url
         """
+        # TODO: If the generation of the file isn't instantaneous, will fail
         import urllib.request
         import shutil
 
