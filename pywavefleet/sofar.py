@@ -1,30 +1,58 @@
 """
-Sofar Devices
+Classes used to connect to the Sofar API and return data
 """
+from datetime import datetime, timezone
+from multiprocessing.pool import ThreadPool
 from pywavefleet import SofarConnection
 from pywavefleet.tools import parse_date
-from pywavefleet.wavefleet import Spotter
 from pywavefleet.wavefleet_exceptions import QueryError, CouldNotRetrieveFile
 
 
 class SofarApi(SofarConnection):
+    """
+    Class for interfacing with the Sofar Wavefleet API
+    """
     def __init__(self):
         super().__init__()
-        self._spotters = self._devices()
-        self.devices = None
+        self.devices = self._devices()
 
+    # ---------------------------------- Simple Device Endpoints -------------------------------------- #
+    def get_devices(self):
+        """
+
+        :return: Basic data about the spotters belonging to this account
+        """
+        return self._devices()
+
+    def get_device_ids(self):
+        """
+
+        :return: List of ids associated with the clients environment token
+        """
+        return [device['spotterId'] for device in self.devices]
+
+    def get_device_location_data(self):
+        """
+
+        :return: The most recent locations of all spotters belonging to this account
+        """
+        return self._device_radius()
+
+    # ---------------------------------- Single Spotter Endpoints -------------------------------------- #
     def grab_datafile(self, spotter_id: str, start_date: str, end_date: str):
         """
 
-        :param spotter_id: The id of the spotter
-        :param start_date: The start date of the data to be included
-        :param end_date: The end date of the data to be included
-        :return: None if not completed, else the url
+        :param spotter_id: The string id of the spotter
+        :param start_date: ISO8601 formatted start date of the data
+        :param end_date: ISO8601 formatted end date of the data
+
+        :return: None if not completed, else the status of the file download
         """
         # TODO: If the generation of the file isn't instantaneous, will fail
         import urllib.request
         import shutil
 
+        # QUERY to request the file
         body = {
             "spotterId": spotter_id,
             "startDate": start_date,
@@ -38,6 +66,7 @@ class SofarApi(SofarConnection):
 
         file_id = response['data']['fileId']
 
+        # QUERY to download the requested file
         scode, response = self._get(f"datafile/{file_id}")
 
         status = response['fileStatus']
@@ -46,6 +75,7 @@ class SofarApi(SofarConnection):
         if status != "complete":
             raise CouldNotRetrieveFile(f"File creation not yet complete. Try {file_url} in a little bit")
 
+        # downloading the file
         file_name = f"{spotter_id}_{start_date}_{end_date}"
         with urllib.request.urlopen(file_url) as response, open(file_name, 'wb') as out_file:
             shutil.copyfileobj(response, out_file)
@@ -55,6 +85,15 @@ class SofarApi(SofarConnection):
     def get_latest_data(self, spotter_id: str,
                         include_wind_data: bool = False,
                         include_directional_moments: bool = False):
+        """
+
+        :param spotter_id: The string id of the spotter
+        :param include_wind_data: Defaults to False. Set to True if you want the latest data to include wind data
+        :param include_directional_moments: Defaults to False. Only applies if the spotter is in 'full_waves' mode.
+                                            Set to True if you want the latest data to include directional moments
+
+        :return: The latest data values based on the given parameters from the requested spotter
+        """
         params = {'spotterId': spotter_id}
 
         if include_directional_moments:
@@ -72,72 +111,21 @@ class SofarApi(SofarConnection):
 
         return data
 
-    def get_wave_data(self):
-        # TODO: For all spotters?
-        pass
-
-    def get_wind_data(self):
-        # TODO: For all spotters?
-        pass
-
-    def get_frequency_data(self):
-        # TODO: for all spotters?
-        pass
-
-    def get_all_spotter_data(self):
-        # TODO: Get data for all spotters
-        pass
-
-    def get_device_ids(self):
-        """
-
-        :return: List of ids associated with the environment token
-        """
-        return [device['spotterId'] for device in self._spotters]
-
-    def get_devices(self, update: bool = False):
-        """
-
-        :param update: If cached data exists, then either return that (update = False) or query to gain the most
-                       recent data (update = True or (update = False and self.devices = None) )
-                       and update the cache
-
-        :return: A list of the spotter objects associated with this account
-        """
-        if self.devices is not None and not update:
-            return self.devices
-
-        spotter_names = {device['spotter']: device['name'] for device in self._spotters}
-        status_code, data = self._get('device-radius')
-
-        if status_code != 200:
-            raise QueryError(data['message'])
-
-        spot_data = data['devices']
-
-        spotter_objs = []
-        for device in spot_data:
-            _id = device['spotterId']
-            _name = spotter_names[_id]
-
-            sptr = Spotter(_id, _name)
-            sptr.lat(device['location']['lat'])
-            sptr.lon(device['location']['lon'])
-            sptr.update_timestamp(device['location']['timestamp'])
-
-            spotter_objs.append(sptr)
-
-        self.devices = spotter_objs
-
-        # TODO: still need to get mode somehow
-        return spotter_objs
-
     def update_spotter_name(self, spotter_id, new_spotter_name):
+        """
+        Update the name of a spotter
+
+        :param spotter_id: The string id of the spotter whose name you want to change
+        :param new_spotter_name: The new name to give to the requested spotter
+
+        :return: The new name if the query succeeds else throws an error
+        """
         body = {
             "spotterId": spotter_id,
             "name": new_spotter_name
         }
 
+        # request name update
         scode, response = self._post("change-name", body)
         message = response['message']
 
@@ -147,6 +135,114 @@ class SofarApi(SofarConnection):
         print(f"{spotter_id} updated with name: {response['data']['name']}")
 
         return new_spotter_name
+
+    # ---------------------------------- Multi Spotter Endpoints -------------------------------------- #
+    def get_wave_data(self, start_date: str = None, end_date: str = None):
+        """
+        Get all wave data for related spotters
+
+        :param start_date: ISO8601 start date of data period
+        :param end_date: ISO8601 end date of data period
+
+        :return: Wave data as a list
+        """
+        _ids = self.get_device_ids()
+        queries = [Query(_id, limit=500, start_date=start_date, end_date=end_date) for _id in _ids]
+
+        pool = ThreadPool(processes=16)
+        _data = pool.map(_wave_worker, queries)
+        pool.close()
+
+        return _data
+
+    def get_wind_data(self, start_date: str = None, end_date: str = None):
+        """
+        Get all wind data for related spotters
+
+        :param start_date: ISO8601 start date of data period
+        :param end_date: ISO8601 end date of data period
+
+        :return: Wind data as a list
+        """
+        _ids = self.get_device_ids()
+        queries = [Query(_id, limit=500, start_date=start_date, end_date=end_date) for _id in _ids]
+
+        # Set query to include desired params
+        for q in queries:
+            q.waves(False)
+            q.wind(True)
+
+        pool = ThreadPool(processes=16)
+        _data = pool.map(_wind_worker, queries)
+        pool.close()
+
+        return _data
+
+    def get_frequency_data(self, start_date: str = None, end_date: str = None):
+        """
+        Get all Frequency data for related spotters
+
+        :param start_date: ISO8601 start date of data period
+        :param end_date: ISO8601 end date of data period
+
+        :return: Frequency data as a list
+        """
+        _ids = self.get_device_ids()
+        queries = [Query(_id, limit=500, start_date=start_date, end_date=end_date) for _id in _ids]
+
+        # Set query to include desired params
+        for q in queries:
+            q.waves(False)
+            q.frequency(True)
+
+        pool = ThreadPool(processes=16)
+        _data = pool.map(_frequency_worker, queries)
+        pool.close()
+
+        return _data
+
+    def get_track_data(self, start_date: str = None, end_date: str = None):
+        """
+        Get all track data for related spotters
+
+        :param start_date: ISO8601 start date of data period
+        :param end_date: ISO8601 end date of data period
+
+        :return: track data as a list
+        """
+        _ids = self.get_device_ids()
+        queries = [Query(_id, limit=500, start_date=start_date, end_date=end_date) for _id in _ids]
+
+        # Set query to include desired params
+        for q in queries:
+            q.waves(False)
+            q.track(True)
+
+        pool = ThreadPool(processes=16)
+        _data = pool.map(_track_worker, queries)
+        pool.close()
+
+        return _data
+
+    def get_all_data(self, start_date: str = None, end_date: str = None):
+        """
+        Get all data for related spotters
+
+        :param start_date: ISO8601 start date of data period
+        :param end_date: ISO8601 end date of data period
+
+        :return: Data as a list
+        """
+        _ids = self.get_device_ids()
+        queries = [Query(_id, limit=500, start_date=start_date, end_date=end_date) for _id in _ids]
+
+        pool = ThreadPool(processes=16)
+        _data = pool.map(_data_worker, queries)
+        pool.close()
+
+        return _data
+
+    def get_spotters(self): return get_and_update_spotters(_api=self)
 
     # ---------------------------------- Helper Functions -------------------------------------- #
     def _devices(self):
@@ -159,6 +255,16 @@ class SofarApi(SofarConnection):
 
         return _spotters
 
+    def _device_radius(self):
+        status_code, data = self._get('device-radius')
+
+        if status_code != 200:
+            raise QueryError(data['message'])
+
+        spot_data = data['data']['devices']
+
+        return spot_data
+
 
 class Query(SofarConnection):
     """
@@ -167,7 +273,7 @@ class Query(SofarConnection):
     def __init__(self, spotter_id: str, limit: int = 20, start_date=None, end_date=None):
         super().__init__()
         self.spotter_id = spotter_id
-        self.limit = limit
+        self._limit = limit
 
         self.start_date = start_date
         self.end_date = end_date
@@ -183,10 +289,10 @@ class Query(SofarConnection):
         }
 
         if start_date is not None:
-            self._params.update({'startDate': start_date})
+            self._params.update({'startDate': parse_date(start_date)})
 
         if end_date is not None:
-            self._params.update({'endDate': end_date})
+            self._params.update({'endDate': parse_date(end_date)})
 
     def execute(self):
         scode, data = self._get('wave-data', params=self._params)
@@ -204,7 +310,7 @@ class Query(SofarConnection):
         Max of 500 if tracking or waves-standard
         Max of 100 if frequency data is included
         """
-        self.limit = value
+        self._limit = value
         self._params.update({'limit': value})
 
     def waves(self, include: bool):
@@ -260,3 +366,186 @@ class Query(SofarConnection):
 
     def clear_end_date(self):
         del self._params['endDate']
+
+    def __str__(self):
+        s = f"Query for {self.spotter_id} \n" +\
+            f"  Start: {self.start_date or 'From Beginning'} \n" +\
+            f"  End: {self.end_date or 'Til Present'} \n" +\
+            "  Params:\n" +\
+            f"    id: {self._params['spotterId']}\n" +\
+            f"    limit: {self._params['limit']} \n" +\
+            f"    waves: {self._params['includeWaves']} \n" +\
+            f"    wind: {self._params['includeWindData']} \n" +\
+            f"    track: {self._params['includeTrack']} \n" +\
+            f"    frequency: {self._params['includeFrequencyData']} \n" +\
+            f"    directional_moments: {self._params['includeDirectionalMoments']} \n"
+
+        return s
+
+
+# ---------------------------------- Util Functions -------------------------------------- #
+def get_and_update_spotters(_api=None):
+    """
+
+    :return: A list of the spotter objects associated with this account
+    """
+
+    api = _api or SofarApi()
+
+    # grab device id's and query for device data
+    # initialize spotter objects
+    spot_data = api.devices
+
+    pool = ThreadPool(processes=16)
+    spotters = pool.map(_spot_worker, spot_data)
+    pool.close()
+
+    return spotters
+
+
+# ---------------------------------- Workers -------------------------------------- #
+def _spot_worker(device: dict):
+    from pywavefleet.wavefleet import Spotter
+
+    _id = device['spotterId']
+    _name = device['name']
+
+    sptr = Spotter(_id, _name)
+    sptr.update()
+
+    return sptr
+
+
+def _data_worker(data_query):
+    def helper(_type):
+        q = data_query
+        q.waves(False)
+
+        if _type == 'waves':
+            q.waves(True)
+            return _wave_worker(q)
+        elif _type == 'winds':
+            q.wind(True)
+            return _wind_worker(q)
+        elif _type == 'track':
+            q.track(True)
+            return _track_worker(q)
+        else:
+            q.frequency(True)
+            return _frequency_worker
+
+    pool = ThreadPool(processes=4)
+    results = pool.map(helper, ['waves', 'winds', 'track', 'frequency'])
+    pool.close()
+
+    waves, winds, track, frequency = results
+
+    return waves, winds, track, frequency
+
+
+def _wave_worker(data_query):
+    s_date = data_query.start_date or '2000-01-01T00:00:00.000Z'
+    e_date = data_query.end_date or datetime.now(tz=timezone.utc)
+
+    st = datetime.strptime(s_date, '%Y-%m-%dT%H:%M:%S.%f%z')
+    end = datetime.strptime(e_date, '%Y-%m-%dT%H:%M:%S.%f%z')
+    results = []
+
+    while st < end:
+        _q = data_query.execute()
+        temp = _q['data']
+        lim = temp['limit']
+
+        w_data = temp['waves']
+        if len(w_data) == 0 or len(w_data) < lim:
+            # no more results
+            break
+
+        results.extend(w_data)
+
+        # tighten time increment
+        end = datetime.strptime(w_data[0]['timestamp'], '%Y-%m-%dT%H:%M:%S.%f%z')
+
+    results.reverse()
+    return results
+
+
+def _wind_worker(data_query):
+    s_date = data_query.start_date or '2000-01-01T00:00:00.000Z'
+    e_date = data_query.end_date or datetime.now(tz=timezone.utc)
+
+    st = datetime.strptime(s_date, '%Y-%m-%dT%H:%M:%S.%f%z')
+    end = datetime.strptime(e_date, '%Y-%m-%dT%H:%M:%S.%f%z')
+    results = []
+
+    while st < end:
+        _q = data_query.execute()
+        temp = _q['data']
+        lim = temp['limit']
+
+        w_data = temp['winds']
+        if len(w_data) == 0 or len(w_data) < lim:
+            # no more results
+            break
+
+        results.extend(w_data)
+
+        # tighten time increment
+        end = datetime.strptime(w_data[0]['timestamp'], '%Y-%m-%dT%H:%M:%S.%f%z')
+
+    results.reverse()
+    return results
+
+
+def _track_worker(data_query):
+    s_date = data_query.start_date or '2000-01-01T00:00:00.000Z'
+    e_date = data_query.end_date or datetime.now(tz=timezone.utc)
+
+    st = datetime.strptime(s_date, '%Y-%m-%dT%H:%M:%S.%f%z')
+    end = datetime.strptime(e_date, '%Y-%m-%dT%H:%M:%S.%f%z')
+    results = []
+
+    while st < end:
+        _q = data_query.execute()
+        temp = _q['data']
+        lim = temp['limit']
+
+        w_data = temp['track']
+        if len(w_data) == 0 or len(w_data) < lim:
+            # no more results
+            break
+
+        results.extend(w_data)
+
+        # tighten time increment
+        end = datetime.strptime(w_data[0]['timestamp'], '%Y-%m-%dT%H:%M:%S.%f%z')
+
+    results.reverse()
+    return results
+
+
+def _frequency_worker(data_query):
+    s_date = data_query.start_date or '2000-01-01T00:00:00.000Z'
+    e_date = data_query.end_date or datetime.now(tz=timezone.utc)
+
+    st = datetime.strptime(s_date, '%Y-%m-%dT%H:%M:%S.%f%z')
+    end = datetime.strptime(e_date, '%Y-%m-%dT%H:%M:%S.%f%z')
+    results = []
+
+    while st < end:
+        _q = data_query.execute()
+        temp = _q['data']
+        lim = temp['limit']
+
+        w_data = temp['frequency']
+        if len(w_data) == 0 or len(w_data) < lim:
+            # no more results
+            break
+
+        results.extend(w_data)
+
+        # tighten time increment
+        end = datetime.strptime(w_data[0]['timestamp'], '%Y-%m-%dT%H:%M:%S.%f%z')
+
+    results.reverse()
+    return results

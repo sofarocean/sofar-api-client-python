@@ -28,7 +28,7 @@ def parse_date(date_object):
         if "." not in date_object:
             return datetime.datetime.strptime(date_object, "%Y-%m-%dT%H:%M:%S").isoformat(timespec="milliseconds")
 
-        return datetime.datetime.strptime(date_object, "%Y-%m-%dT%H:%M:%S.%fZ").isoformat(timespec="milliseconds")
+        return datetime.datetime.strptime(date_object, "%Y-%m-%dT%H:%M:%S.%f%z").isoformat(timespec="milliseconds")
     elif isinstance(date_object, datetime.datetime):
         return date_object.isoformat(timespec="milliseconds")
     else:
