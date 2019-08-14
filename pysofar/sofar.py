@@ -1,11 +1,18 @@
 """
-Classes used to connect to the Sofar API and return data
+This file is part of pysofar: A client for interfacing with Sofar Oceans Spotter API
+
+Contents: Classes used to connect to the Sofar API and return data
+
+Copyright (C) 2019
+Sofar Ocean Technologies
+
+Authors: Mike Sosa
 """
 from datetime import datetime, timezone
 from multiprocessing.pool import ThreadPool
-from pywavefleet import SofarConnection
-from pywavefleet.tools import parse_date
-from pywavefleet.wavefleet_exceptions import QueryError, CouldNotRetrieveFile
+from pysofar import SofarConnection
+from pysofar.tools import parse_date
+from pysofar.wavefleet_exceptions import QueryError, CouldNotRetrieveFile
 
 
 class SofarApi(SofarConnection):
@@ -300,7 +307,7 @@ class Query(SofarConnection):
         if scode != 200:
             raise QueryError(data['message'])
 
-        return data
+        return data['data']
 
     def limit(self, value: int):
         """
@@ -405,7 +412,7 @@ def get_and_update_spotters(_api=None):
 
 # ---------------------------------- Workers -------------------------------------- #
 def _spot_worker(device: dict):
-    from pywavefleet.wavefleet import Spotter
+    from pysofar.spotter import Spotter
 
     _id = device['spotterId']
     _name = device['name']

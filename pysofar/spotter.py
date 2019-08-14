@@ -1,7 +1,14 @@
 """
-Classes for representing devices and data grabbed from the api
+This file is part of pysofar: A client for interfacing with Sofar Oceans Spotter API
+
+Contents: Classes for representing devices and data grabbed from the api
+
+Copyright (C) 2019
+Sofar Ocean Technologies
+
+Authors: Mike Sosa
 """
-from pywavefleet.sofar import SofarApi, Query
+from pysofar.sofar import SofarApi, Query
 
 
 # --------------------- Devices ----------------------------------------------#
@@ -168,7 +175,7 @@ class Spotter:
         :param start_date: Start date string
         :param end_date: End date String
         """
-        from pywavefleet.tools import parse_date
+        from pysofar.tools import parse_date
         self._session.grab_datafile(self.id, parse_date(start_date), parse_date(end_date))
 
     def update(self):
@@ -181,15 +188,15 @@ class Spotter:
         _data = self._session.get_latest_data(self.id)
 
         self.name = _data['spotterName']
-        self.mode = _data['payloadType']
-        self.lat = _data['track'][-1]['latitude']
-        self.lon = _data['track'][-1]['longitude']
+        self._mode = _data['payloadType']
+        self._latitude = _data['track'][-1]['latitude']
+        self._longitude = _data['track'][-1]['longitude']
         self._timestamp = _data['track'][-1]['timestamp']
 
-        self.battery_power = _data['batteryPower']
-        self.battery_voltage = _data['batteryVoltage']
-        self.solar_voltage = _data['solarVoltage']
-        self.humidity = _data['humidity']
+        self._battery_power = _data['batteryPower']
+        self._battery_voltage = _data['batteryVoltage']
+        self._solar_voltage = _data['solarVoltage']
+        self._humidity = _data['humidity']
 
         wave_data = _data['waves']
         track_data = _data['track']

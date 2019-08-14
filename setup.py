@@ -4,7 +4,7 @@ with open('README.md', 'r') as file:
     readme_contents = file.read()
 
 setuptools.setup(
-    name='pywavefleet',
+    name='pysofar',
     version='0.1',
     scripts=[],
     author='Rufus Sofar',
@@ -14,7 +14,7 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     url='https://github.com/wavespotter/wavefleet-client-python',
     packages=setuptools.find_packages(),
-    namespace_packages=['pywavefleet'],
+    namespace_packages=['pysofar'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",

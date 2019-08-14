@@ -1,3 +1,11 @@
+"""
+This file is part of pysofar: A client for interfacing with Sofar Oceans Spotter API
+
+Copyright (C) 2019
+Sofar Ocean Technologies
+
+Authors: Mike Sosa
+"""
 import os
 import dotenv
 import requests
