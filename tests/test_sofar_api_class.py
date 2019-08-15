@@ -24,6 +24,19 @@ def test_get_latest_data():
     assert 'frequencyData' in latest_dat
 
 
+def test_get_and_update_spotters():
+    from pysofar.spotter import Spotter
+    from pysofar.sofar import get_and_update_spotters
+
+    sptrs = get_and_update_spotters(_api=api)
+
+    assert sptrs is not None
+    assert all(map(lambda x: isinstance(x, Spotter), sptrs))
 
 
+def test_get_all_wind_data():
+    dat = api.get_wind_data(start_date='2019-05-02', end_date='2019-07-10')
 
+    assert dat is not None
+    #print(dat)
+    assert isinstance(dat, list)

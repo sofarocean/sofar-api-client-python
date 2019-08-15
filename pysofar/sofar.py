@@ -9,6 +9,7 @@ Sofar Ocean Technologies
 Authors: Mike Sosa
 """
 from datetime import datetime, timezone
+from itertools import chain
 from multiprocessing.pool import ThreadPool
 from pysofar import SofarConnection
 from pysofar.tools import parse_date
@@ -154,7 +155,8 @@ class SofarApi(SofarConnection):
         :return: Wave data as a list
         """
         _ids = self.get_device_ids()
-        queries = [Query(_id, limit=500, start_date=start_date, end_date=end_date) for _id in _ids]
+        queries = [Query(_id, limit=500,
+                         start_date=parse_date(start_date), end_date=parse_date(end_date)) for _id in _ids]
 
         pool = ThreadPool(processes=16)
         _data = pool.map(_wave_worker, queries)
@@ -172,7 +174,8 @@ class SofarApi(SofarConnection):
         :return: Wind data as a list
         """
         _ids = self.get_device_ids()
-        queries = [Query(_id, limit=500, start_date=start_date, end_date=end_date) for _id in _ids]
+        queries = [Query(_id, limit=500,
+                         start_date=parse_date(start_date), end_date=parse_date(end_date)) for _id in _ids]
 
         # Set query to include desired params
         for q in queries:
@@ -182,6 +185,12 @@ class SofarApi(SofarConnection):
         pool = ThreadPool(processes=16)
         _data = pool.map(_wind_worker, queries)
         pool.close()
+
+        # right now data is list of lists, convert to single list and sort
+        _data = list(chain(*_data))
+
+        if len(_data) > 0:
+            _data.sort(key=lambda x: x['timestamp'])
 
         return _data
 
@@ -195,7 +204,8 @@ class SofarApi(SofarConnection):
         :return: Frequency data as a list
         """
         _ids = self.get_device_ids()
-        queries = [Query(_id, limit=500, start_date=start_date, end_date=end_date) for _id in _ids]
+        queries = [Query(_id, limit=500,
+                         start_date=parse_date(start_date), end_date=parse_date(end_date)) for _id in _ids]
 
         # Set query to include desired params
         for q in queries:
@@ -205,6 +215,12 @@ class SofarApi(SofarConnection):
         pool = ThreadPool(processes=16)
         _data = pool.map(_frequency_worker, queries)
         pool.close()
+
+        # right now data is list of lists, convert to single list and sort
+        _data = list(chain(*_data))
+
+        if len(_data) > 0:
+            _data.sort(key=lambda x: x['timestamp'])
 
         return _data
 
@@ -218,7 +234,8 @@ class SofarApi(SofarConnection):
         :return: track data as a list
         """
         _ids = self.get_device_ids()
-        queries = [Query(_id, limit=500, start_date=start_date, end_date=end_date) for _id in _ids]
+        queries = [Query(_id, limit=500,
+                         start_date=parse_date(start_date), end_date=parse_date(end_date)) for _id in _ids]
 
         # Set query to include desired params
         for q in queries:
@@ -228,6 +245,12 @@ class SofarApi(SofarConnection):
         pool = ThreadPool(processes=16)
         _data = pool.map(_track_worker, queries)
         pool.close()
+
+        # right now data is list of lists, convert to single list and sort
+        _data = list(chain(*_data))
+
+        if len(_data) > 0:
+            _data.sort(key=lambda x: x['timestamp'])
 
         return _data
 
@@ -241,12 +264,20 @@ class SofarApi(SofarConnection):
         :return: Data as a list
         """
         _ids = self.get_device_ids()
-        queries = [Query(_id, limit=500, start_date=start_date, end_date=end_date) for _id in _ids]
+        queries = [Query(_id, limit=500,
+                         start_date=parse_date(start_date), end_date=parse_date(end_date)) for _id in _ids]
 
         pool = ThreadPool(processes=16)
         _data = pool.map(_data_worker, queries)
         pool.close()
 
+        # TODO: See results of this and decide whether to reduce
+        # # right now data is list of lists, convert to single list and sort
+        # _data = list(chain(*_data))
+        #
+        # if len(_data) > 0:
+        #     _data.sort(key=lambda x: x['timestamp'])
+        #
         return _data
 
     def get_spotters(self): return get_and_update_spotters(_api=self)
@@ -483,14 +514,17 @@ def _wind_worker(data_query):
 
     st = datetime.strptime(s_date, '%Y-%m-%dT%H:%M:%S.%f%z')
     end = datetime.strptime(e_date, '%Y-%m-%dT%H:%M:%S.%f%z')
+
+    data_query.set_start_date(st)
+
     results = []
 
     while st < end:
+        data_query.set_end_date(end)
         _q = data_query.execute()
-        temp = _q['data']
-        lim = temp['limit']
+        lim = _q['limit']
 
-        w_data = temp['winds']
+        w_data = _q['wind']
         if len(w_data) == 0 or len(w_data) < lim:
             # no more results
             break
@@ -514,10 +548,9 @@ def _track_worker(data_query):
 
     while st < end:
         _q = data_query.execute()
-        temp = _q['data']
-        lim = temp['limit']
+        lim = _q['limit']
 
-        w_data = temp['track']
+        w_data = _q['track']
         if len(w_data) == 0 or len(w_data) < lim:
             # no more results
             break
@@ -541,10 +574,9 @@ def _frequency_worker(data_query):
 
     while st < end:
         _q = data_query.execute()
-        temp = _q['data']
-        lim = temp['limit']
+        lim = _q['limit']
 
-        w_data = temp['frequency']
+        w_data = _q['frequencyData']
         if len(w_data) == 0 or len(w_data) < lim:
             # no more results
             break

@@ -28,18 +28,28 @@ def parse_date(date_object):
     :param date_object: Give in utc format, either epoch, string, or datetime object
     :return: String date formatted in ISO 8601 format
     """
+    _date = None
+
     if isinstance(date_object, (int, float)):
-        return datetime.datetime.utcfromtimestamp(date_object).isoformat(timespec="milliseconds")
+        _date = datetime.datetime.utcfromtimestamp(date_object)
     elif isinstance(date_object, str):
         # time includes microseconds
-        if "T" not in date_object:
-            return datetime.datetime.strptime(date_object, "%Y-%m-%d").isoformat(timespec="milliseconds")
+        formatting = "%Y-%m-%dT%H:%M:%S.%f%z"
+
+        if "Z" not in date_object and "+" not in date_object:
+            formatting = "%Y-%m-%dT%H:%M:%S.%f"
 
         if "." not in date_object:
-            return datetime.datetime.strptime(date_object, "%Y-%m-%dT%H:%M:%S").isoformat(timespec="milliseconds")
+            formatting = "%Y-%m-%dT%H:%M:%S"
 
-        return datetime.datetime.strptime(date_object, "%Y-%m-%dT%H:%M:%S.%f%z").isoformat(timespec="milliseconds")
+        if "T" not in date_object:
+            formatting = "%Y-%m-%d"
+
+        _date = datetime.datetime.strptime(date_object, formatting)
     elif isinstance(date_object, datetime.datetime):
-        return date_object.isoformat(timespec="milliseconds")
+        _date = date_object
     else:
         raise Exception('Invalid Date Format')
+
+    f_string = _date.isoformat(timespec="milliseconds")
+    return f"{f_string}Z" if "+" not in f_string else f_string
