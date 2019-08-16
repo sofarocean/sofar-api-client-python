@@ -154,19 +154,7 @@ class SofarApi(SofarConnection):
 
         :return: Wave data as a list
         """
-        _ids = self.get_device_ids()
-        # defaults to given start date or start of 2000
-        st = start_date or '2000-01-01T00:00:00.000Z'
-        # defaults to given end date of now
-        end = end_date or datetime.utcnow()
-
-        queries = [Query(_id, limit=500, start_date=st, end_date=end) for _id in _ids]
-
-        pool = ThreadPool(processes=16)
-        _data = pool.map(_wave_worker, queries)
-        pool.close()
-
-        return _data
+        return self._get_all_data(['waves'], start_date, end_date)
 
     def get_wind_data(self, start_date: str = None, end_date: str = None):
         """
@@ -177,30 +165,7 @@ class SofarApi(SofarConnection):
 
         :return: Wind data as a list
         """
-        _ids = self.get_device_ids()
-        # defaults to given start date or start of 2000
-        st = start_date or '2000-01-01T00:00:00.000Z'
-        # defaults to given end date of now
-        end = end_date or datetime.utcnow()
-
-        queries = [Query(_id, limit=500, start_date=st, end_date=end) for _id in _ids]
-
-        # Set query to include desired params
-        for q in queries:
-            q.waves(False)
-            q.wind(True)
-
-        pool = ThreadPool(processes=16)
-        _data = pool.map(_wind_worker, queries)
-        pool.close()
-
-        # right now data is list of lists, convert to single list and sort
-        _data = list(chain(*_data))
-
-        if len(_data) > 0:
-            _data.sort(key=lambda x: x['timestamp'])
-
-        return _data
+        return self._get_all_data(['wind'], start_date, end_date)
 
     def get_frequency_data(self, start_date: str = None, end_date: str = None):
         """
@@ -211,30 +176,7 @@ class SofarApi(SofarConnection):
 
         :return: Frequency data as a list
         """
-        _ids = self.get_device_ids()
-        # defaults to given start date or start of 2000
-        st = start_date or '2000-01-01T00:00:00.000Z'
-        # defaults to given end date of now
-        end = end_date or datetime.utcnow()
-
-        queries = [Query(_id, limit=500, start_date=st, end_date=end) for _id in _ids]
-
-        # Set query to include desired params
-        for q in queries:
-            q.waves(False)
-            q.frequency(True)
-
-        pool = ThreadPool(processes=16)
-        _data = pool.map(_frequency_worker, queries)
-        pool.close()
-
-        # right now data is list of lists, convert to single list and sort
-        _data = list(chain(*_data))
-
-        if len(_data) > 0:
-            _data.sort(key=lambda x: x['timestamp'])
-
-        return _data
+        return self._get_all_data(['frequency'], start_date, end_date)
 
     def get_track_data(self, start_date: str = None, end_date: str = None):
         """
@@ -245,30 +187,7 @@ class SofarApi(SofarConnection):
 
         :return: track data as a list
         """
-        _ids = self.get_device_ids()
-        # defaults to given start date or start of 2000
-        st = start_date or '2000-01-01T00:00:00.000Z'
-        # defaults to given end date of now
-        end = end_date or datetime.utcnow()
-
-        queries = [Query(_id, limit=500, start_date=st, end_date=end) for _id in _ids]
-
-        # Set query to include desired params
-        for q in queries:
-            q.waves(False)
-            q.track(True)
-
-        pool = ThreadPool(processes=16)
-        _data = pool.map(_track_worker, queries)
-        pool.close()
-
-        # right now data is list of lists, convert to single list and sort
-        _data = list(chain(*_data))
-
-        if len(_data) > 0:
-            _data.sort(key=lambda x: x['timestamp'])
-
-        return _data
+        return self._get_all_data(['track'], start_date, end_date)
 
     def get_all_data(self, start_date: str = None, end_date: str = None):
         """
@@ -279,31 +198,13 @@ class SofarApi(SofarConnection):
 
         :return: Data as a list
         """
-        _ids = self.get_device_ids()
-        # defaults to given start date or start of 2000
-        st = start_date or '2000-01-01T00:00:00.000Z'
-        # defaults to given end date of now
-        end = end_date or datetime.utcnow()
-
-        queries = [Query(_id, limit=500, start_date=st, end_date=end) for _id in _ids]
-
-        pool = ThreadPool(processes=16)
-        _data = pool.map(_data_worker, queries)
-        pool.close()
-
-        # TODO: See results of this and decide whether to reduce
-        # # right now data is list of lists, convert to single list and sort
-        # _data = list(chain(*_data))
-        #
-        # if len(_data) > 0:
-        #     _data.sort(key=lambda x: x['timestamp'])
-        #
-        return _data
+        return self._get_all_data(['waves', 'wind', 'frequency', 'track'], start_date, end_date)
 
     def get_spotters(self): return get_and_update_spotters(_api=self)
 
     # ---------------------------------- Helper Functions -------------------------------------- #
     def _devices(self):
+        # Helper function to access the devices endpoint
         scode, data = self._get('/devices')
 
         if scode != 200:
@@ -314,6 +215,7 @@ class SofarApi(SofarConnection):
         return _spotters
 
     def _device_radius(self):
+        # helper function to access the device radius endpoint
         status_code, data = self._get('device-radius')
 
         if status_code != 200:
@@ -323,6 +225,30 @@ class SofarApi(SofarConnection):
 
         return spot_data
 
+    def _get_all_data(self, worker_names: list, start_date: str = None, end_date: str = None):
+        # helper function to return another function used for grabbing all data from spotters in a period
+        def helper(_name):
+            _ids = self.get_device_ids()
+
+            # default to bound values if not included
+            st = start_date or '2000-01-01T00:00:00.000Z'
+            end = end_date or datetime.utcnow()
+
+            _wrker = worker_wrapper((_name, _ids, st, end))
+            return _wrker
+
+        # processing the data_types in parallel
+        pool = ThreadPool(processes=len(worker_names))
+        all_data = pool.map(helper, worker_names)
+        pool.close()
+
+        all_data = {name: l for name, l in zip(worker_names, all_data)}
+
+        # if len(all_data) > 0:
+        #     all_data.sort(key=lambda x: x['timestamp'])
+
+        return all_data
+
 
 class Query(SofarConnection):
     """
@@ -331,6 +257,15 @@ class Query(SofarConnection):
     _MISSING = object()
 
     def __init__(self, spotter_id: str, limit: int = 20, start_date=_MISSING, end_date=_MISSING):
+        """
+        Query the Sofar api for spotter data
+
+        :param spotter_id: String id of the spotter to query for
+        :param limit: The limit of data to query. Defaults to 20, max of 100 for frequency data, max of 500 otherwise
+        :param start_date: ISO8601 formatted string for start date, otherwise if not included, defaults to
+                            a date arbitrarily far back to include all spotter data
+        :param end_date: ISO8601 formatted string for end date, otherwise if not included defaults to present
+        """
         super().__init__()
         self.spotter_id = spotter_id
         self._limit = limit
@@ -362,6 +297,11 @@ class Query(SofarConnection):
             self._params.update({'endDate': self.end_date})
 
     def execute(self):
+        """
+        Calls the api wave-data endpoint and if successful returns the queried data with the set query parameters
+
+        :return: Data as a dictionary
+        """
         scode, data = self._get('wave-data', params=self._params)
 
         if scode != 200:
@@ -477,6 +417,13 @@ def get_and_update_spotters(_api=None):
 
 # ---------------------------------- Workers -------------------------------------- #
 def _spot_worker(device: dict):
+    """
+    Worker to grab spotter data
+
+    :param device: Dictionary containing the spotter id and name
+
+    :return: Spotter object updated from the Sofar api with its latest data values
+    """
     from pysofar.spotter import Spotter
 
     _id = device['spotterId']
@@ -488,3 +435,77 @@ def _spot_worker(device: dict):
     return sptr
 
 
+def worker_wrapper(args):
+    """
+    Wrapper for creating workers to grab lots of data
+
+    :param args: Tuple of the worker_type: str (ex. 'wind', 'waves', 'frequency', 'track')
+                              _ids: list of str, which are the spotter ids
+                              st_date: str, iso 8601 formatted start date of period to query
+                              end_date: str, iso 8601 formatted end date of period to query
+
+    :return: All data for that type for all spotters in the queried period
+    """
+    worker_type, _ids, st_date, end_date = args
+    queries = [Query(_id, limit=500, start_date=st_date, end_date=end_date) for _id in _ids]
+
+    # grabbing data from all of the spotters in parallel
+    pool = ThreadPool(processes=16)
+    _wrkr = _worker(worker_type)
+    worker_data = pool.map(_wrkr, queries)
+    pool.close()
+
+    # unwrap list of lists
+    worker_data = list(chain(*worker_data))
+
+    if len(worker_data) > 0:
+        worker_data.sort(key=lambda x: x['timestamp'])
+
+    return worker_data
+
+
+def _worker(data_type):
+    """
+    Worker to grab data from certain data type for a specific query
+
+    :param data_type: The desired data type
+
+    :return: A helper function able to process a query for that specific data type
+    """
+    def _helper(data_query):
+        st = data_query.start_date
+        end = data_query.end_date
+
+        # setup the query
+        data_query.waves(False)
+        getattr(data_query, data_type)(True)
+
+        if data_type == 'frequency':
+            dkey = 'frequencyData'
+            data_query.directional_moments(True)
+        else:
+            dkey = data_type
+
+        query_data = []
+
+        while st < end:
+            _query = data_query.execute()
+
+            lim = _query['limit']
+            results = _query[dkey]
+
+            for dt in results:
+                dt.update({'spotterId': _query['spotterId']})
+
+            query_data.extend(results)
+
+            if len(results) < lim:
+                break
+
+            st = results[-1]['timestamp']
+            data_query.set_start_date(st)
+
+        # here query data is a list of dictionaries
+        return query_data
+
+    return _helper

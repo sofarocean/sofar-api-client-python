@@ -25,6 +25,7 @@ def test_get_latest_data():
 
 
 def test_get_and_update_spotters():
+    # Test that spotter objects are able to be created and updated
     from pysofar.spotter import Spotter
     from pysofar.sofar import get_and_update_spotters
 
@@ -35,24 +36,60 @@ def test_get_and_update_spotters():
 
 
 def test_get_all_wave_data():
+    # Test that all wave data is able to be queried in a time range
     st = '2019-05-02'
     end = '2019-07-10'
     dat = api.get_wave_data(start_date=st, end_date=end)
 
     assert dat is not None
-
-    assert isinstance(dat, list)
+    assert isinstance(dat, dict)
+    assert 'waves' in dat
+    assert len(dat['waves']) > 0
 
 
 def test_get_all_wind_data():
-    # st = '2019-05-02'
-    # end = '2019-07-10'
-    # dat = api.get_wind_data(start_date=st, end_date=end)
+    # Test that all wind data over all time is able to be queried
     dat = api.get_wind_data()
 
     assert dat is not None
-    # TODO: More testing here of results?
-    #print(dat)
-    assert isinstance(dat, list)
+    assert isinstance(dat, dict)
+    assert 'wind' in dat
+    assert len(dat['wind']) > 0
 
 
+def test_get_all_tracking_data():
+    # Test that all tracking data is able to be queried in a time range
+    st = '2019-05-02'
+    end = '2019-07-10'
+    dat = api.get_track_data(start_date=st, end_date=end)
+
+    assert dat is not None
+    assert isinstance(dat, dict)
+    assert 'track' in dat
+    assert len(dat['track']) > 0
+
+
+def test_get_all_frequency_data():
+    # Test that all frequency data is able to be queried in a time range
+    dat = api.get_frequency_data()
+
+    assert dat is not None
+    assert isinstance(dat, dict)
+    assert 'frequency' in dat
+    assert len(dat['frequency']) > 0
+
+
+def test_get_all_data():
+    # Test that grabbing data from all spotters from all data types works
+    st = '2019-01-18'
+    end = '2019-01-25'
+
+    dat = api.get_all_data(start_date=st, end_date=end)
+
+    assert dat is not None
+    assert isinstance(dat, dict)
+    assert len(dat.keys()) == 4
+    assert 'waves' in dat
+    assert 'wind' in dat
+    assert 'track' in dat
+    assert 'frequency' in dat

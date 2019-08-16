@@ -1,7 +1,7 @@
 """
 This file is part of pysofar: A client for interfacing with Sofar Oceans Spotter API
 
-Contents: Functions useful for parsing date objects and measuring coordinate distances
+Contents: Functions useful for date/time related parsing and formatting
 
 Copyright (C) 2019
 Sofar Ocean Technologies
