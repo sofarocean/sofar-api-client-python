@@ -34,9 +34,25 @@ def test_get_and_update_spotters():
     assert all(map(lambda x: isinstance(x, Spotter), sptrs))
 
 
-def test_get_all_wind_data():
-    dat = api.get_wind_data(start_date='2019-05-02', end_date='2019-07-10')
+def test_get_all_wave_data():
+    st = '2019-05-02'
+    end = '2019-07-10'
+    dat = api.get_wave_data(start_date=st, end_date=end)
 
     assert dat is not None
+
+    assert isinstance(dat, list)
+
+
+def test_get_all_wind_data():
+    # st = '2019-05-02'
+    # end = '2019-07-10'
+    # dat = api.get_wind_data(start_date=st, end_date=end)
+    dat = api.get_wind_data()
+
+    assert dat is not None
+    # TODO: More testing here of results?
     #print(dat)
     assert isinstance(dat, list)
+
+

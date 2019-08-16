@@ -8,7 +8,7 @@ Sofar Ocean Technologies
 
 Authors: Mike Sosa
 """
-from datetime import datetime, timezone
+from datetime import datetime
 from itertools import chain
 from multiprocessing.pool import ThreadPool
 from pysofar import SofarConnection
@@ -155,8 +155,12 @@ class SofarApi(SofarConnection):
         :return: Wave data as a list
         """
         _ids = self.get_device_ids()
-        queries = [Query(_id, limit=500,
-                         start_date=parse_date(start_date), end_date=parse_date(end_date)) for _id in _ids]
+        # defaults to given start date or start of 2000
+        st = start_date or '2000-01-01T00:00:00.000Z'
+        # defaults to given end date of now
+        end = end_date or datetime.utcnow()
+
+        queries = [Query(_id, limit=500, start_date=st, end_date=end) for _id in _ids]
 
         pool = ThreadPool(processes=16)
         _data = pool.map(_wave_worker, queries)
@@ -174,8 +178,12 @@ class SofarApi(SofarConnection):
         :return: Wind data as a list
         """
         _ids = self.get_device_ids()
-        queries = [Query(_id, limit=500,
-                         start_date=parse_date(start_date), end_date=parse_date(end_date)) for _id in _ids]
+        # defaults to given start date or start of 2000
+        st = start_date or '2000-01-01T00:00:00.000Z'
+        # defaults to given end date of now
+        end = end_date or datetime.utcnow()
+
+        queries = [Query(_id, limit=500, start_date=st, end_date=end) for _id in _ids]
 
         # Set query to include desired params
         for q in queries:
@@ -204,8 +212,12 @@ class SofarApi(SofarConnection):
         :return: Frequency data as a list
         """
         _ids = self.get_device_ids()
-        queries = [Query(_id, limit=500,
-                         start_date=parse_date(start_date), end_date=parse_date(end_date)) for _id in _ids]
+        # defaults to given start date or start of 2000
+        st = start_date or '2000-01-01T00:00:00.000Z'
+        # defaults to given end date of now
+        end = end_date or datetime.utcnow()
+
+        queries = [Query(_id, limit=500, start_date=st, end_date=end) for _id in _ids]
 
         # Set query to include desired params
         for q in queries:
@@ -234,8 +246,12 @@ class SofarApi(SofarConnection):
         :return: track data as a list
         """
         _ids = self.get_device_ids()
-        queries = [Query(_id, limit=500,
-                         start_date=parse_date(start_date), end_date=parse_date(end_date)) for _id in _ids]
+        # defaults to given start date or start of 2000
+        st = start_date or '2000-01-01T00:00:00.000Z'
+        # defaults to given end date of now
+        end = end_date or datetime.utcnow()
+
+        queries = [Query(_id, limit=500, start_date=st, end_date=end) for _id in _ids]
 
         # Set query to include desired params
         for q in queries:
@@ -264,8 +280,12 @@ class SofarApi(SofarConnection):
         :return: Data as a list
         """
         _ids = self.get_device_ids()
-        queries = [Query(_id, limit=500,
-                         start_date=parse_date(start_date), end_date=parse_date(end_date)) for _id in _ids]
+        # defaults to given start date or start of 2000
+        st = start_date or '2000-01-01T00:00:00.000Z'
+        # defaults to given end date of now
+        end = end_date or datetime.utcnow()
+
+        queries = [Query(_id, limit=500, start_date=st, end_date=end) for _id in _ids]
 
         pool = ThreadPool(processes=16)
         _data = pool.map(_data_worker, queries)
@@ -308,13 +328,22 @@ class Query(SofarConnection):
     """
     General Query class
     """
-    def __init__(self, spotter_id: str, limit: int = 20, start_date=None, end_date=None):
+    _MISSING = object()
+
+    def __init__(self, spotter_id: str, limit: int = 20, start_date=_MISSING, end_date=_MISSING):
         super().__init__()
         self.spotter_id = spotter_id
         self._limit = limit
 
-        self.start_date = start_date
-        self.end_date = end_date
+        if start_date is self._MISSING or start_date is None:
+            self.start_date = None
+        else:
+            self.start_date = parse_date(start_date)
+
+        if end_date is self._MISSING or end_date is None:
+            self.end_date = None
+        else:
+            self.end_date = parse_date(end_date)
 
         self._params = {
             'spotterId': spotter_id,
@@ -326,11 +355,11 @@ class Query(SofarConnection):
             'includeDirectionalMoments': 'false'
         }
 
-        if start_date is not None:
-            self._params.update({'startDate': parse_date(start_date)})
+        if self.start_date is not None:
+            self._params.update({'startDate': self.start_date})
 
-        if end_date is not None:
-            self._params.update({'endDate': parse_date(end_date)})
+        if self.end_date is not None:
+            self._params.update({'endDate': self.end_date})
 
     def execute(self):
         scode, data = self._get('wave-data', params=self._params)
@@ -394,16 +423,21 @@ class Query(SofarConnection):
         self._params.update({'includeDirectionalMoments': str(include).lower()})
 
     def set_start_date(self, new_date: str):
-        self._params.update({'startDate': parse_date(new_date)})
+        self.start_date = parse_date(new_date)
+        self._params.update({'startDate': self.start_date})
 
     def clear_start_date(self):
-        del self._params['startDate']
+        self.start_date = None
+        if 'startDate' in self._params:
+            del self._params['startDate']
 
     def set_end_date(self, new_date: str):
-        self._params.update({'endDate': parse_date(new_date)})
+        self.end_date = parse_date(new_date)
+        self._params.update({'endDate': self.end_date})
 
     def clear_end_date(self):
-        del self._params['endDate']
+        if 'endDate' in self._params:
+            del self._params['endDate']
 
     def __str__(self):
         s = f"Query for {self.spotter_id} \n" +\
@@ -454,137 +488,3 @@ def _spot_worker(device: dict):
     return sptr
 
 
-def _data_worker(data_query):
-    def helper(_type):
-        q = data_query
-        q.waves(False)
-
-        if _type == 'waves':
-            q.waves(True)
-            return _wave_worker(q)
-        elif _type == 'winds':
-            q.wind(True)
-            return _wind_worker(q)
-        elif _type == 'track':
-            q.track(True)
-            return _track_worker(q)
-        else:
-            q.frequency(True)
-            return _frequency_worker
-
-    pool = ThreadPool(processes=4)
-    results = pool.map(helper, ['waves', 'winds', 'track', 'frequency'])
-    pool.close()
-
-    waves, winds, track, frequency = results
-
-    return waves, winds, track, frequency
-
-
-def _wave_worker(data_query):
-    s_date = data_query.start_date or '2000-01-01T00:00:00.000Z'
-    e_date = data_query.end_date or datetime.now(tz=timezone.utc)
-
-    st = datetime.strptime(s_date, '%Y-%m-%dT%H:%M:%S.%f%z')
-    end = datetime.strptime(e_date, '%Y-%m-%dT%H:%M:%S.%f%z')
-    results = []
-
-    while st < end:
-        _q = data_query.execute()
-        temp = _q['data']
-        lim = temp['limit']
-
-        w_data = temp['waves']
-        if len(w_data) == 0 or len(w_data) < lim:
-            # no more results
-            break
-
-        results.extend(w_data)
-
-        # tighten time increment
-        end = datetime.strptime(w_data[0]['timestamp'], '%Y-%m-%dT%H:%M:%S.%f%z')
-
-    results.reverse()
-    return results
-
-
-def _wind_worker(data_query):
-    s_date = data_query.start_date or '2000-01-01T00:00:00.000Z'
-    e_date = data_query.end_date or datetime.now(tz=timezone.utc)
-
-    st = datetime.strptime(s_date, '%Y-%m-%dT%H:%M:%S.%f%z')
-    end = datetime.strptime(e_date, '%Y-%m-%dT%H:%M:%S.%f%z')
-
-    data_query.set_start_date(st)
-
-    results = []
-
-    while st < end:
-        data_query.set_end_date(end)
-        _q = data_query.execute()
-        lim = _q['limit']
-
-        w_data = _q['wind']
-        if len(w_data) == 0 or len(w_data) < lim:
-            # no more results
-            break
-
-        results.extend(w_data)
-
-        # tighten time increment
-        end = datetime.strptime(w_data[0]['timestamp'], '%Y-%m-%dT%H:%M:%S.%f%z')
-
-    results.reverse()
-    return results
-
-
-def _track_worker(data_query):
-    s_date = data_query.start_date or '2000-01-01T00:00:00.000Z'
-    e_date = data_query.end_date or datetime.now(tz=timezone.utc)
-
-    st = datetime.strptime(s_date, '%Y-%m-%dT%H:%M:%S.%f%z')
-    end = datetime.strptime(e_date, '%Y-%m-%dT%H:%M:%S.%f%z')
-    results = []
-
-    while st < end:
-        _q = data_query.execute()
-        lim = _q['limit']
-
-        w_data = _q['track']
-        if len(w_data) == 0 or len(w_data) < lim:
-            # no more results
-            break
-
-        results.extend(w_data)
-
-        # tighten time increment
-        end = datetime.strptime(w_data[0]['timestamp'], '%Y-%m-%dT%H:%M:%S.%f%z')
-
-    results.reverse()
-    return results
-
-
-def _frequency_worker(data_query):
-    s_date = data_query.start_date or '2000-01-01T00:00:00.000Z'
-    e_date = data_query.end_date or datetime.now(tz=timezone.utc)
-
-    st = datetime.strptime(s_date, '%Y-%m-%dT%H:%M:%S.%f%z')
-    end = datetime.strptime(e_date, '%Y-%m-%dT%H:%M:%S.%f%z')
-    results = []
-
-    while st < end:
-        _q = data_query.execute()
-        lim = _q['limit']
-
-        w_data = _q['frequencyData']
-        if len(w_data) == 0 or len(w_data) < lim:
-            # no more results
-            break
-
-        results.extend(w_data)
-
-        # tighten time increment
-        end = datetime.strptime(w_data[0]['timestamp'], '%Y-%m-%dT%H:%M:%S.%f%z')
-
-    results.reverse()
-    return results

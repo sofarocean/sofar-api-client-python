@@ -28,7 +28,7 @@ def test_parse_date_string():
     dt = parse_date(ts)
 
     assert dt is not None
-    assert dt == '1985-11-15T12:34:56.000+00:00'
+    assert dt == '1985-11-15T12:34:56.000Z'
 
 
 def test_parse_date_string_only_days():
@@ -49,6 +49,24 @@ def test_parse_date_string_no_milliseconds():
     assert dt == '1985-11-15T12:34:56.000Z'
 
 
+def test_parse_date_string_no_utc():
+    # test Y-M-DTH:M:S parses
+    ts = '1985-11-15T12:34:56.000'
+    dt = parse_date(ts)
+
+    assert dt is not None
+    assert dt == '1985-11-15T12:34:56.000Z'
+
+
+def test_parse_date_string_utc_offset():
+    # test Y-M-DTH:M:S parses
+    ts = '1985-11-15T12:34:56.000+00:00'
+    dt = parse_date(ts)
+
+    assert dt is not None
+    assert dt == '1985-11-15T12:34:56.000Z'
+
+
 def test_parse_date_datetime():
     # test passing in a datetime works
     ts = datetime(1997, 2, 16, 5, 25)
@@ -56,3 +74,21 @@ def test_parse_date_datetime():
 
     assert dt is not None
     assert dt == '1997-02-16T05:25:00.000Z'
+
+
+def test_parse_date_datetime_aware():
+    # test passing in aware datetime
+    from datetime import timezone
+
+    ts = datetime.now(tz=timezone.utc)
+    dt = parse_date(ts)
+
+    assert dt is not None
+
+
+def test_parse_date_datetime_unaware():
+    # passing in another datetime func
+    ts = datetime.utcnow()
+    dt = parse_date(ts)
+
+    assert dt is not None

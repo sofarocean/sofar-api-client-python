@@ -31,6 +31,7 @@ def test_get_device_ids():
 
 def test_get_device_location_data():
     # test that the api can retrieve device location data
+    d = dat
     assert dat is not None
     assert len(dat) != 0
     assert all(map(lambda x: isinstance(x, dict), dat))

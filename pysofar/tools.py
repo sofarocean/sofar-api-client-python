@@ -19,7 +19,7 @@ def time_stamp_to_epoch(date_string):
     :param date_string: Date string formatted as iso
     :return:
     """
-    return calendar.timegm(time.strptime(date_string, '%Y-%m-%dT%H:%M:%S.%fZ'))
+    return calendar.timegm(time.strptime(date_string, '%Y-%m-%dT%H:%M:%S.%f%z'))
 
 
 def parse_date(date_object):
@@ -51,5 +51,6 @@ def parse_date(date_object):
     else:
         raise Exception('Invalid Date Format')
 
-    f_string = _date.isoformat(timespec="milliseconds")
-    return f"{f_string}Z" if "+" not in f_string else f_string
+    # make zone unaware
+    f_string = _date.replace(tzinfo=None).isoformat(timespec="milliseconds")
+    return f"{f_string}Z"
