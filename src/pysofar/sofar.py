@@ -11,9 +11,9 @@ Authors: Mike Sosa
 from datetime import datetime
 from itertools import chain
 from multiprocessing.pool import ThreadPool
-from pysofar import SofarConnection
-from pysofar.tools import parse_date
-from pysofar.wavefleet_exceptions import QueryError, CouldNotRetrieveFile
+from src.pysofar import SofarConnection
+from src.pysofar.tools import parse_date
+from src.pysofar.wavefleet_exceptions import QueryError, CouldNotRetrieveFile
 
 
 class SofarApi(SofarConnection):
@@ -23,22 +23,9 @@ class SofarApi(SofarConnection):
     def __init__(self):
         super().__init__()
         self.devices = self._devices()
+        self.device_ids = [device['spotterId'] for device in self.devices]
 
     # ---------------------------------- Simple Device Endpoints -------------------------------------- #
-    def get_devices(self):
-        """
-
-        :return: Basic data about the spotters belonging to this account
-        """
-        return self._devices()
-
-    def get_device_ids(self):
-        """
-
-        :return: List of ids associated with the clients environment token
-        """
-        return [device['spotterId'] for device in self.devices]
-
     def get_device_location_data(self):
         """
 
@@ -57,6 +44,7 @@ class SofarApi(SofarConnection):
         :return: None if not completed, else the status of the file download
         """
         # TODO: If the generation of the file isn't instantaneous, will fail
+        #  TODO : Look into async.io for potential solution?
         import urllib.request
         import shutil
 
@@ -228,7 +216,7 @@ class SofarApi(SofarConnection):
     def _get_all_data(self, worker_names: list, start_date: str = None, end_date: str = None):
         # helper function to return another function used for grabbing all data from spotters in a period
         def helper(_name):
-            _ids = self.get_device_ids()
+            _ids = self.device_ids
 
             # default to bound values if not included
             st = start_date or '2000-01-01T00:00:00.000Z'
@@ -250,7 +238,7 @@ class SofarApi(SofarConnection):
         return all_data
 
 
-class Query(SofarConnection):
+class WaveDataQuery(SofarConnection):
     """
     General Query class
     """
@@ -424,7 +412,7 @@ def _spot_worker(device: dict):
 
     :return: Spotter object updated from the Sofar api with its latest data values
     """
-    from pysofar.spotter import Spotter
+    from src.pysofar.spotter import Spotter
 
     _id = device['spotterId']
     _name = device['name']
@@ -447,7 +435,7 @@ def worker_wrapper(args):
     :return: All data for that type for all spotters in the queried period
     """
     worker_type, _ids, st_date, end_date = args
-    queries = [Query(_id, limit=500, start_date=st_date, end_date=end_date) for _id in _ids]
+    queries = [WaveDataQuery(_id, limit=500, start_date=st_date, end_date=end_date) for _id in _ids]
 
     # grabbing data from all of the spotters in parallel
     pool = ThreadPool(processes=16)

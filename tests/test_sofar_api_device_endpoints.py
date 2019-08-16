@@ -8,12 +8,12 @@ Sofar Ocean Technologies
 
 Authors: Mike Sosa
 """
-from pysofar.sofar import SofarApi
+from src.pysofar.sofar import SofarApi
 
 api = SofarApi()
 dat = api.get_device_location_data()
-devices = api.get_devices()
-device_ids = api.get_device_ids()
+devices = api.devices
+device_ids = api.device_ids
 
 
 def test_get_device():
@@ -25,8 +25,8 @@ def test_get_device():
 
 def test_get_device_ids():
     # test that the device ids are returned correctly
-    assert api.get_device_ids() is not None
-    assert isinstance(api.get_device_ids(), list)
+    assert api.device_ids is not None
+    assert isinstance(api.device_ids, list)
 
 
 def test_get_device_location_data():

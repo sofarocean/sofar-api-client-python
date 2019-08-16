@@ -8,11 +8,11 @@ Sofar Ocean Technologies
 
 Authors: Mike Sosa
 """
-from pysofar.sofar import Query
+from src.pysofar.sofar import WaveDataQuery
 
 st = '2019-05-02'
 end = '2019-05-10'
-q = Query('SPOT-0130', limit=100, start_date=st, end_date=end)
+q = WaveDataQuery('SPOT-0130', limit=100, start_date=st, end_date=end)
 q.wind(True)
 
 

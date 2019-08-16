@@ -1,8 +1,5 @@
+nose
 python-dotenv
+pytest
 requests
 
-# for development
-# pytest
-# nose
-pytest
-nose

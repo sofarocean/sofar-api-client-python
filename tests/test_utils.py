@@ -9,7 +9,7 @@ Sofar Ocean Technologies
 Authors: Mike Sosa
 """
 from datetime import datetime
-from pysofar.tools import parse_date, time_stamp_to_epoch
+from src.pysofar.tools import parse_date, time_stamp_to_epoch
 
 
 def test_time_stamp_to_epoch():

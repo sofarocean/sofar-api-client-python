@@ -8,7 +8,7 @@ Sofar Ocean Technologies
 
 Authors: Mike Sosa
 """
-from pysofar.sofar import SofarApi, Query
+from src.pysofar.sofar import SofarApi, WaveDataQuery
 
 
 # --------------------- Devices ----------------------------------------------#
@@ -175,7 +175,7 @@ class Spotter:
         :param start_date: Start date string
         :param end_date: End date String
         """
-        from pysofar.tools import parse_date
+        from src.pysofar.tools import parse_date
         self._session.grab_datafile(self.id, parse_date(start_date), parse_date(end_date))
 
     def update(self):
@@ -255,7 +255,7 @@ class Spotter:
 
         :return: Data as a json based on the given query paramters
         """
-        _query = Query(self.id, limit, start_date, end_date)
+        _query = WaveDataQuery(self.id, limit, start_date, end_date)
         _query.waves(include_waves)
         _query.wind(include_wind)
         _query.track(include_track)
