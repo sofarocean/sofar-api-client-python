@@ -1,0 +1,33 @@
+dist: xenial
+language: python
+python:
+  - '3.7'
+branches:
+  except:
+    - master
+install:
+  - pip install -r requirements.txt
+  - pip install setuptools wheel
+jobs:
+  include:
+    - stage: deploy
+      script:
+        - bash gitsetup.sh
+        - bash build.sh
+        - pytest
+    - stage: test
+      script:
+        - python setup.py bdist_wheel
+        - pip install dist/*.whl
+        - pytest
+stages:
+  - name: build
+    if: "(branch = staging) AND (NOT (type IN (pull_request)))"
+  - name: test
+    if: "type IN (pull_request)"
+
+after_success:
+  - test $TRAVIS_BRANCH = "staging" && test $TRAVIS_PULL_REQUEST = "false" && bash deploy.sh
+after_failure:
+  - echo "Oh no"
+# TODO: Notifications
