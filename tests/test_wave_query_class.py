@@ -8,7 +8,7 @@ Sofar Ocean Technologies
 
 Authors: Mike Sosa
 """
-from src.pysofar.sofar import WaveDataQuery
+from pysofar.sofar import WaveDataQuery
 
 st = '2019-05-02'
 end = '2019-05-10'

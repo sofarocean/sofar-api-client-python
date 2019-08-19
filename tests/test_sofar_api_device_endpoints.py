@@ -8,7 +8,7 @@ Sofar Ocean Technologies
 
 Authors: Mike Sosa
 """
-from src.pysofar.sofar import SofarApi
+from pysofar.sofar import SofarApi
 
 api = SofarApi()
 dat = api.get_device_location_data()

@@ -8,7 +8,7 @@ Sofar Ocean Technologies
 
 Authors: Mike Sosa
 """
-from src.pysofar.sofar import SofarApi
+from pysofar.sofar import SofarApi
 
 api = SofarApi()
 latest_dat = api.get_latest_data('SPOT-0130', include_wind_data=True)

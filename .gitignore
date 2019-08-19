@@ -2,3 +2,6 @@ venv/
 .idea
 __pycache__/
 *.pyc
+build/
+.pytest_cache/
+pysofar.egg-info/

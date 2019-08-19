@@ -8,8 +8,8 @@ Sofar Ocean Technologies
 
 Authors: Mike Sosa
 """
-from src.pysofar.sofar import SofarApi
-from src.pysofar.spotter import Spotter
+from pysofar.sofar import SofarApi
+from pysofar.spotter import Spotter
 
 api = SofarApi()
 
