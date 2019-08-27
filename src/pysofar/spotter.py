@@ -8,7 +8,7 @@ Sofar Ocean Technologies
 
 Authors: Mike Sosa
 """
-from src.pysofar.sofar import SofarApi, WaveDataQuery
+from pysofar.sofar import SofarApi, WaveDataQuery
 
 
 # --------------------- Devices ----------------------------------------------#

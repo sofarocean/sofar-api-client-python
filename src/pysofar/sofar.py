@@ -11,9 +11,9 @@ Authors: Mike Sosa
 from datetime import datetime
 from itertools import chain
 from multiprocessing.pool import ThreadPool
-from src.pysofar import SofarConnection
-from src.pysofar.tools import parse_date
-from src.pysofar.wavefleet_exceptions import QueryError, CouldNotRetrieveFile
+from pysofar import SofarConnection
+from pysofar.tools import parse_date
+from pysofar.wavefleet_exceptions import QueryError, CouldNotRetrieveFile
 
 
 class SofarApi(SofarConnection):
