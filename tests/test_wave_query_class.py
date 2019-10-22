@@ -12,7 +12,7 @@ from pysofar.sofar import WaveDataQuery
 
 st = '2019-05-02'
 end = '2019-05-10'
-q = WaveDataQuery('SPOT-0130', limit=100, start_date=st, end_date=end)
+q = WaveDataQuery('SPOT-0196', limit=100, start_date=st, end_date=end)
 q.wind(True)
 
 

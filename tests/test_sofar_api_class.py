@@ -11,7 +11,7 @@ Authors: Mike Sosa
 from pysofar.sofar import SofarApi
 
 api = SofarApi()
-latest_dat = api.get_latest_data('SPOT-0130', include_wind_data=True)
+latest_dat = api.get_latest_data('SPOT-0196', include_wind_data=True)
 
 
 def test_get_latest_data():
