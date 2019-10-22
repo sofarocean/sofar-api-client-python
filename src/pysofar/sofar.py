@@ -20,10 +20,15 @@ class SofarApi(SofarConnection):
     """
     Class for interfacing with the Sofar Wavefleet API
     """
-    def __init__(self):
-        super().__init__()
-        self.devices = self._devices()
-        self.device_ids = [device['spotterId'] for device in self.devices]
+    def __init__(self, custom_token=None):
+        if custom_token is not None:
+            super().__init__(custom_token)
+        else:
+            super().__init__()
+
+        self.devices = []
+        self.device_ids = []
+        self._sync()
 
     # ---------------------------------- Simple Device Endpoints -------------------------------------- #
     def get_device_location_data(self):
@@ -191,6 +196,26 @@ class SofarApi(SofarConnection):
     def get_spotters(self): return get_and_update_spotters(_api=self)
 
     # ---------------------------------- Helper Functions -------------------------------------- #
+    @property
+    def token(self):
+        return self._token
+
+    @token.setter
+    def token(self, value):
+        temp = self.token
+        self.set_token(value)
+
+        try:
+            self._sync()
+        except QueryError:
+            print('Authentication failed. Please check the key')
+            print('Reverting to old key')
+            self.set_token(temp)
+
+    def _sync(self):
+        self.devices = self._devices()
+        self.device_ids = [device['spotterId'] for device in self.devices]
+
     def _devices(self):
         # Helper function to access the devices endpoint
         scode, data = self._get('/devices')

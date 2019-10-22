@@ -34,10 +34,10 @@ class SofarConnection:
     Base Parent class for connections to the api
     Use SofarApi in sofar.py in practice
     """
-    def __init__(self):
-        self.token = get_token()
+    def __init__(self, custom_token=None):
+        self._token = custom_token or get_token()
         self.endpoint = get_endpoint()
-        self.header = {'token': self.token, 'Content-Type': 'application/json'}
+        self.header = {'token': self._token, 'Content-Type': 'application/json'}
 
     # Helper methods
     def _get(self, endpoint_suffix, params: dict = None):
@@ -61,3 +61,9 @@ class SofarConnection:
         data = json.loads(response.text)
 
         return status, data
+
+    def set_token(self, new_token):
+        self._token = new_token
+        self.header.update({'token': new_token})
+
+
