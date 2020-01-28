@@ -437,7 +437,7 @@ def _spot_worker(device: dict):
 
     :return: Spotter object updated from the Sofar api with its latest data values
     """
-    from src.pysofar.spotter import Spotter
+    from pysofar.spotter import Spotter
 
     _id = device['spotterId']
     _name = device['name']

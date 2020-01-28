@@ -11,7 +11,7 @@ Authors: Mike Sosa
 from pysofar.sofar import SofarApi
 
 api = SofarApi()
-latest_dat = api.get_latest_data('SPOT-0196', include_wind_data=True)
+latest_dat = api.get_latest_data('SPOT-0350', include_wind_data=True)
 
 
 def test_get_latest_data():
@@ -26,8 +26,8 @@ def test_get_latest_data():
 
 def test_get_and_update_spotters():
     # Test that spotter objects are able to be created and updated
-    from src.pysofar.spotter import Spotter
-    from src.pysofar.sofar import get_and_update_spotters
+    from pysofar.spotter import Spotter
+    from pysofar.sofar import get_and_update_spotters
 
     sptrs = get_and_update_spotters(_api=api)
 
