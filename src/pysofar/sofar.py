@@ -269,12 +269,13 @@ class WaveDataQuery(SofarConnection):
     """
     _MISSING = object()
 
-    def __init__(self, spotter_id: str, limit: int = 20, start_date=_MISSING, end_date=_MISSING):
+    def __init__(self, spotter_id: str, limit: int = 20, include_non_obs=True, start_date=_MISSING, end_date=_MISSING):
         """
         Query the Sofar api for spotter data
 
         :param spotter_id: String id of the spotter to query for
         :param limit: The limit of data to query. Defaults to 20, max of 100 for frequency data, max of 500 otherwise
+        :param include_non_obs: Defaults to true. Set false if you want to include all data (some non valid as well)
         :param start_date: ISO8601 formatted string for start date, otherwise if not included, defaults to
                             a date arbitrarily far back to include all spotter data
         :param end_date: ISO8601 formatted string for end date, otherwise if not included defaults to present
@@ -300,7 +301,8 @@ class WaveDataQuery(SofarConnection):
             'includeWindData': 'false',
             'includeTrack': 'false',
             'includeFrequencyData': 'false',
-            'includeDirectionalMoments': 'false'
+            'includeDirectionalMoments': 'false',
+            'includeNonObs': 'true' if include_non_obs else 'false'
         }
 
         if self.start_date is not None:
@@ -512,11 +514,19 @@ def _worker(data_type):
 
             query_data.extend(results)
 
-            if len(results) < lim:
+            # break if no results are returned
+            if len(results) == 0:
+                # previous break condition was
+                # len(results) < lim
                 break
 
             st = results[-1]['timestamp']
             data_query.set_start_date(st)
+
+            # break if start and end dates are the same to avoid potential infinite loop for samples
+            # at end time
+            if st == end:
+                break
 
         # here query data is a list of dictionaries
         return query_data
