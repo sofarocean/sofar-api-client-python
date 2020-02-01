@@ -269,7 +269,7 @@ class WaveDataQuery(SofarConnection):
     """
     _MISSING = object()
 
-    def __init__(self, spotter_id: str, limit: int = 20, include_non_obs=True, start_date=_MISSING, end_date=_MISSING):
+    def __init__(self, spotter_id: str, limit: int = 20, include_non_obs=False, start_date=_MISSING, end_date=_MISSING):
         """
         Query the Sofar api for spotter data
 
