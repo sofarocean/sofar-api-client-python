@@ -13,7 +13,7 @@ from pysofar.spotter import Spotter
 
 api = SofarApi()
 
-device = Spotter('SPOT-0130', '')
+device = Spotter('SPOT-0350', '')
 
 
 def test_spotter_update():

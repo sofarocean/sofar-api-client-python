@@ -175,7 +175,7 @@ class Spotter:
         :param start_date: Start date string
         :param end_date: End date String
         """
-        from src.pysofar.tools import parse_date
+        from pysofar.tools import parse_date
         self._session.grab_datafile(self.id, parse_date(start_date), parse_date(end_date))
 
     def update(self):
