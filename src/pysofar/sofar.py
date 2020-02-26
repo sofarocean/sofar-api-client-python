@@ -384,6 +384,41 @@ class WaveDataQuery(SofarConnection):
                      Please set includeFrequencyData to true with .frequency(True) if desired. \n""")
         self._params.update({'includeDirectionalMoments': str(include).lower()})
 
+    def smooth_wave_data(self, include: bool):
+        """
+
+        :param include: True if you want the query to smooth wave data
+        """
+        self._params.update({'smoothWaveData': str(include).lower()})
+
+    def smooth_sg_window(self, value: int):
+        """
+
+        :param value: Window size of the SG smoothing filter. Must be odd positive int.
+        """
+        self._params.update({'smoothSGWindow': value})
+
+    def smooth_sg_order(self, value: int):
+        """
+
+        :param value: Polynomial order of SG smoothing filter. Positive int > 0.
+        """
+        self._params.update({'smoothSGOrder': value})
+
+    def interpolate_utc(self, include: bool):
+        """
+
+        :param include: True if you want the query to interpolate data to UTC hours time base.
+        """
+        self._params.update({'interpolateUTC': str(include).lower()})
+
+    def interpolate_period_seconds(self, value: int):
+        """
+
+        :param value: Period in seconds of samples after smoothing and/or interpolation.
+        """
+        self._params.update({'interpolatePeriodSeconds': value})
+
     def set_start_date(self, new_date: str):
         self.start_date = parse_date(new_date)
         self._params.update({'startDate': self.start_date})
