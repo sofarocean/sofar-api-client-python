@@ -236,7 +236,8 @@ class Spotter:
                   start_date: str = None, end_date: str = None,
                   include_waves: bool = True, include_wind: bool = False,
                   include_track: bool = False, include_frequency_data: bool = False,
-                  include_directional_moments: bool = False):
+                  include_directional_moments: bool = False,
+                  include_surface_temp_data: bool = False):
         """
         Grabs the requested data for this spotter based on the given keyword arguments
 
@@ -252,6 +253,8 @@ class Spotter:
         :param include_directional_moments: Defaults to False. Only applies if the spotter is in 'Full Waves mode' and
                                             'include_frequency_data' is True. Set True if you want the frequency data
                                             returned to also include directional moments
+        :param include_surface_temp_data: Defaults to False. Set to True if your device is a v2 model or newer with the
+                                          SST sensor installed
 
         :return: Data as a json based on the given query paramters
         """
@@ -261,6 +264,7 @@ class Spotter:
         _query.track(include_track)
         _query.frequency(include_frequency_data)
         _query.directional_moments(include_directional_moments)
+        _query.surface_temp(include_surface_temp_data)
 
         _data = _query.execute()
 
