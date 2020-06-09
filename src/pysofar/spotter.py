@@ -237,7 +237,12 @@ class Spotter:
                   include_waves: bool = True, include_wind: bool = False,
                   include_track: bool = False, include_frequency_data: bool = False,
                   include_directional_moments: bool = False,
-                  include_surface_temp_data: bool = False):
+                  include_surface_temp_data: bool = False,
+                  smooth_wave_data: bool = False,
+                  smooth_sg_window: int = 135,
+                  smooth_sg_order: int = 4,
+                  interpolate_utc: bool = False,
+                  interpolate_period_seconds: int = 3600):
         """
         Grabs the requested data for this spotter based on the given keyword arguments
 
@@ -265,6 +270,11 @@ class Spotter:
         _query.frequency(include_frequency_data)
         _query.directional_moments(include_directional_moments)
         _query.surface_temp(include_surface_temp_data)
+        _query.smooth_wave_data(smooth_wave_data)
+        _query.smooth_sg_window(smooth_sg_window)
+        _query.smooth_sg_order(smooth_sg_order)
+        _query.interpolate_utc(interpolate_utc)
+        _query.interpolate_period_seconds(interpolate_period_seconds)
 
         _data = _query.execute()
 
