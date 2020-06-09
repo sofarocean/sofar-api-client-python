@@ -307,6 +307,7 @@ class WaveDataQuery(SofarConnection):
             'includeTrack': 'false',
             'includeFrequencyData': 'false',
             'includeDirectionalMoments': 'false',
+            'includeSurfaceTempData': 'false',
             'includeNonObs': 'false'
         }
         if params is not None:
@@ -378,11 +379,19 @@ class WaveDataQuery(SofarConnection):
         if include and not self._params['includeFrequencyData']:
             print("""Warning: You have currently selected the query to include directional moment data however
                      frequency data is not currently included. \n
-                     Directional moment data only applies if the spotter is in full waves/waves spectrum mode. \n 
+                     Directional moment data only applies if the spotter is in full waves/waves spectrum mode. \n
                      Since the query does not include frequency data (of which directional moments are a subset)
                      the data you have requested will not be included. \n
                      Please set includeFrequencyData to true with .frequency(True) if desired. \n""")
         self._params.update({'includeDirectionalMoments': str(include).lower()})
+
+
+    def surface_temp(self, include: bool):
+        """
+
+        :param include: True if you want the query to include surface temp data
+        """
+        self._params.update({'includeSurfaceTempData': str(include).lower()})
 
     def smooth_wave_data(self, include: bool):
         """
