@@ -69,3 +69,18 @@ def test_query_no_end():
 
     assert 'waves' in response
     assert 'wind' in response
+
+def test_query_surface_temp():
+    q.surface_temp(True)
+    q.limit = 10
+
+    q.clear_end_date()
+    response = q.execute()
+    q.set_start_date(st)
+
+    assert response is not None
+    assert isinstance(response, dict)
+
+    assert 'waves' in response
+    assert 'wind' in response
+    assert 'surfaceTemp' in response
