@@ -18,8 +18,9 @@ dotenv.load_dotenv(enviromentFile)
 token = os.getenv('WF_API_TOKEN')
 
 _wavefleet_token = token
-_endpoint = 'https://wavefleet.spoondriftspotter.co/api'
-
+_endpoint = os.getenv('WF_URL')
+if _endpoint is None:
+    _endpoint = 'https://wavefleet.spoondriftspotter.co/api'
 
 def get_token():
     return _wavefleet_token

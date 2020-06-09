@@ -54,3 +54,7 @@
     feel free to add more comments and questions to the issue thread and we will do our best to help you out!
     
 9. Thank you for contributing!!
+
+### Versioning  
+- Bump the semver version number in *./setup.py*
+- Run `build.sh`
