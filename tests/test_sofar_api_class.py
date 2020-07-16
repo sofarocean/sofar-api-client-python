@@ -8,7 +8,20 @@ Sofar Ocean Technologies
 
 Authors: Mike Sosa
 """
+from pysofar import wavefleet_exceptions
 from pysofar.sofar import SofarApi
+
+# The custom token will fail to authenticate so we should catch and pass as it is expected.
+try:
+    custom_api = SofarApi(custom_token='custom_api_token_here')
+except wavefleet_exceptions.QueryError as e:
+    pass
+
+
+def test_custom_api():
+    # test that custom api token is set
+    assert custom_api.token == 'custom_api_token_here'
+
 
 api = SofarApi()
 latest_dat = api.get_latest_data('SPOT-0350', include_wind_data=True)
