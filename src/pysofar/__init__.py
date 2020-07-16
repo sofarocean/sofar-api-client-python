@@ -23,6 +23,9 @@ def get_token():
 
 
 def get_endpoint():
+    _endpoint = os.getenv('WF_URL')
+    if _endpoint is None:
+        _endpoint = 'https://wavefleet.spoondriftspotter.co/api'
     return _endpoint
 
 
