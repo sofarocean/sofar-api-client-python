@@ -11,18 +11,14 @@ import dotenv
 import requests
 import json
 
-# config values
-userpath = os.path.expanduser("~")
-enviromentFile = os.path.join(userpath, 'sofar_api.env')
-dotenv.load_dotenv(enviromentFile)
-token = os.getenv('WF_API_TOKEN')
-
-_wavefleet_token = token
-_endpoint = os.getenv('WF_URL')
-if _endpoint is None:
-    _endpoint = 'https://wavefleet.spoondriftspotter.co/api'
-
 def get_token():
+    # config values
+    userpath = os.path.expanduser("~")
+    enviromentFile = os.path.join(userpath, 'sofar_api.env')
+    dotenv.load_dotenv(enviromentFile)
+    token = os.getenv('WF_API_TOKEN')
+    _wavefleet_token = token
+
     return _wavefleet_token
 
 
