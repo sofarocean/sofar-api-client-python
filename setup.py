@@ -6,7 +6,7 @@ with open('README.md', 'r') as file:
 
 setuptools.setup(
     name='pysofar',
-    version='0.1.8',
+    version='0.1.9',
     license='Apache 2 Licesnse',
     install_requires=[
         'requests',
