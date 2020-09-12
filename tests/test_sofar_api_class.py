@@ -10,13 +10,12 @@ Authors: Mike Sosa
 """
 from pysofar import wavefleet_exceptions
 from pysofar.sofar import SofarApi
+from unittest.mock import patch
 
-# The custom token will fail to authenticate so we should catch and pass as it is expected.
-try:
+
+# The custom token will fail to authenticate so use a mock to bypass the `_sync step`
+with patch.object(SofarApi, '_sync', return_value=None) as mock_method:
     custom_api = SofarApi(custom_token='custom_api_token_here')
-except wavefleet_exceptions.QueryError as e:
-    pass
-
 
 def test_custom_api():
     # test that custom api token is set
