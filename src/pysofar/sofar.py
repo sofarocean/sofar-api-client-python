@@ -112,6 +112,31 @@ class SofarApi(SofarConnection):
 
         return data
 
+    def get_sensor_data(self, spotter_id: str, start_date: str, end_date: str):
+        """
+
+        :param spotter_id: The string id of the spotter
+        :param start_date: ISO8601 formatted start date of the data
+        :param end_date: ISO8601 formatted end date of the data
+
+        :return: Data as a json from the requested spotter
+        """
+        
+        params = {
+            "spotterId": spotter_id,
+            "startDate": start_date,
+            "endDate": end_date
+        }
+
+        scode, results = self._get('/sensor-data', params=params)
+
+        if scode != 200:
+            raise QueryError(results['message'])
+
+        data = results['data']
+
+        return data
+
     def update_spotter_name(self, spotter_id, new_spotter_name):
         """
         Update the name of a spotter
