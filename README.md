@@ -34,6 +34,7 @@ within each function itself.
 - Methods
     - get_device_location_data: Most recent location data of the devices
     - get_latest_data: Use to grab the latest data from a specific spotter
+    - get_sensor_data: Gets smart mooring sensor data for a specific spotter in a date range
     - update_spotter_name: Update the name of a specific spotter
     - get_wave_data: Gets all of the wave data for all of the spotters in a date range
     - get_wind_data: Same as above but for wind

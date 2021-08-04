@@ -105,3 +105,15 @@ def test_get_all_data():
     assert 'wind' in dat
     assert 'track' in dat
     assert 'frequency' in dat
+    
+def test_get_sensor_data():
+    # Test that getting sensor data in a time range works
+    spotter_id = 'SPOT-9999'
+    st = '2021-07-18'
+    end = '2021-07-19'
+    
+    dat = api.get_sensor_data(spotter_id, start_date=st, end_date=end)
+    
+    assert dat is not None
+    assert 'sensorPosition' in dat[-1]
+    
