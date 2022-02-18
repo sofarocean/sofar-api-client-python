@@ -583,7 +583,9 @@ def _worker(data_type):
         while st < end:
             _query = data_query.execute()
 
-            lim = _query['limit']
+            # 'limit' key is not available on non-owner API keys
+            # and we are not currently breaking on this value below 
+            # lim = _query['limit']
             results = _query[dkey]
 
             for dt in results:
