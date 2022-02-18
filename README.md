@@ -19,7 +19,7 @@ Python Client for the Sofar Ocean Spotter API
     [here](https://spotter.sofarocean.com). Open the sidebar and click `api`. You should 
     see a section called `Authentication` which will have a button to generate a token. 
     You can also use this to update your token to a new one, should you desire.
-3. Test with `python3 -c 'import pysofar''`. If this runs successfully, chances are everything worked.
+3. Test with `python3 -c 'import pysofar'`. If this runs successfully, chances are everything worked.
 4. If you wish to develop/contribute to this project see [contributing](contributing.md).
 
 ### Basic Classes
