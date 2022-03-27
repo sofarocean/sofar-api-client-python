@@ -2,4 +2,5 @@ nose
 python-dotenv
 pytest
 requests
+numpy
 

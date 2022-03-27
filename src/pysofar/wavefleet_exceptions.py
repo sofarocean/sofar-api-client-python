@@ -22,3 +22,9 @@ class CouldNotRetrieveFile(Exception):
     Query raised when a requested datafile could not be retrieved.
     """
     pass
+
+class ExceptionNoFrequencyData(Exception):
+    """
+    Query raised when no frequency data is available for the spotter
+    """
+    pass

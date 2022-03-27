@@ -6,11 +6,12 @@ with open('README.md', 'r') as file:
 
 setuptools.setup(
     name='pysofar',
-    version='0.1.10',
+    version='0.1.11',
     license='Apache 2 Licesnse',
     install_requires=[
         'requests',
-        'python-dotenv'
+        'python-dotenv',
+        'numpy'
     ],
     description='Python client for interfacing with the Sofar Wavefleet API to access Spotter Data',
     long_description=readme_contents,
