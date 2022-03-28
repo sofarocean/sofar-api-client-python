@@ -20,6 +20,7 @@ class SofarApi(SofarConnection):
     """
     Class for interfacing with the Sofar Wavefleet API
     """
+
     def __init__(self, custom_token=None):
         if custom_token is not None:
             super().__init__(custom_token)
@@ -74,11 +75,13 @@ class SofarApi(SofarConnection):
         file_url = response['fileUrl']
 
         if status != "complete":
-            raise CouldNotRetrieveFile(f"File creation not yet complete. Try {file_url} in a little bit")
+            raise CouldNotRetrieveFile(
+                f"File creation not yet complete. Try {file_url} in a little bit")
 
         # downloading the file
         file_name = f"{spotter_id}_{start_date}_{end_date}"
-        with urllib.request.urlopen(file_url) as response, open(file_name, 'wb') as out_file:
+        with urllib.request.urlopen(file_url) as response, open(file_name,
+                                                                'wb') as out_file:
             shutil.copyfileobj(response, out_file)
 
         return f"{file_name} downloaded successfully"
@@ -121,7 +124,7 @@ class SofarApi(SofarConnection):
 
         :return: Data as a json from the requested spotter
         """
-        
+
         params = {
             "spotterId": spotter_id,
             "startDate": start_date,
@@ -163,7 +166,8 @@ class SofarApi(SofarConnection):
         return new_spotter_name
 
     # ---------------------------------- Multi Spotter Endpoints -------------------------------------- #
-    def get_wave_data(self, start_date: str = None, end_date: str = None, params: dict = None):
+    def get_wave_data(self, start_date: str = None, end_date: str = None,
+                      params: dict = None):
         """
         Get all wave data for related spotters
 
@@ -175,7 +179,8 @@ class SofarApi(SofarConnection):
         """
         return self._get_all_data(['waves'], start_date, end_date, params)
 
-    def get_wind_data(self, start_date: str = None, end_date: str = None, params: dict = None):
+    def get_wind_data(self, start_date: str = None, end_date: str = None,
+                      params: dict = None):
         """
         Get all wind data for related spotters
 
@@ -187,7 +192,8 @@ class SofarApi(SofarConnection):
         """
         return self._get_all_data(['wind'], start_date, end_date, params)
 
-    def get_frequency_data(self, start_date: str = None, end_date: str = None, params: dict = None):
+    def get_frequency_data(self, start_date: str = None, end_date: str = None,
+                           params: dict = None):
         """
         Get all Frequency data for related spotters
 
@@ -199,7 +205,8 @@ class SofarApi(SofarConnection):
         """
         return self._get_all_data(['frequency'], start_date, end_date, params)
 
-    def get_track_data(self, start_date: str = None, end_date: str = None, params: dict = None):
+    def get_track_data(self, start_date: str = None, end_date: str = None,
+                       params: dict = None):
         """
         Get all track data for related spotters
 
@@ -211,7 +218,8 @@ class SofarApi(SofarConnection):
         """
         return self._get_all_data(['track'], start_date, end_date, params)
 
-    def get_all_data(self, start_date: str = None, end_date: str = None, params: dict = None):
+    def get_all_data(self, start_date: str = None, end_date: str = None,
+                     params: dict = None):
         """
         Get all data for related spotters
 
@@ -221,9 +229,11 @@ class SofarApi(SofarConnection):
 
         :return: Data as a list
         """
-        return self._get_all_data(['waves', 'wind', 'frequency', 'track'], start_date, end_date, params)
+        return self._get_all_data(['waves', 'wind', 'frequency', 'track'],
+                                  start_date, end_date, params)
 
-    def get_spotters(self): return get_and_update_spotters(_api=self)
+    def get_spotters(self):
+        return get_and_update_spotters(_api=self)
 
     # ---------------------------------- Helper Functions -------------------------------------- #
     @property
@@ -268,7 +278,8 @@ class SofarApi(SofarConnection):
 
         return spot_data
 
-    def _get_all_data(self, worker_names: list, start_date: str = None, end_date: str = None, params: dict = None):
+    def _get_all_data(self, worker_names: list, start_date: str = None,
+                      end_date: str = None, params: dict = None):
         # helper function to return another function used for grabbing all data from spotters in a period
         def helper(_name):
             _ids = self.device_ids
@@ -299,7 +310,8 @@ class WaveDataQuery(SofarConnection):
     """
     _MISSING = object()
 
-    def __init__(self, spotter_id: str, limit: int = 20, start_date=_MISSING, end_date=_MISSING, params=None):
+    def __init__(self, spotter_id: str, limit: int = 20, start_date=_MISSING,
+                 end_date=_MISSING, params=None):
         """
         Query the Sofar api for spotter data
 
@@ -333,7 +345,9 @@ class WaveDataQuery(SofarConnection):
             'includeFrequencyData': 'false',
             'includeDirectionalMoments': 'false',
             'includeSurfaceTempData': 'false',
-            'includeNonObs': 'false'
+            'includeNonObs': 'false',
+            'includeMicrophoneData': 'false',
+            'includeBarometerData': 'false'
         }
         if params is not None:
             self._params.update(params)
@@ -367,6 +381,20 @@ class WaveDataQuery(SofarConnection):
         """
         self._limit = value
         self._params.update({'limit': value})
+
+    def barometer(self, include: bool):
+        """
+
+        :param include: True if you want the query to include waves
+        """
+        self._params.update({'includeBarometerData': str(include).lower()})
+
+    def microphone(self, include: bool):
+        """
+
+        :param include: True if you want the query to include waves
+        """
+        self._params.update({'includeMicrophoneData': str(include).lower()})
 
     def waves(self, include: bool):
         """
@@ -408,8 +436,8 @@ class WaveDataQuery(SofarConnection):
                      Since the query does not include frequency data (of which directional moments are a subset)
                      the data you have requested will not be included. \n
                      Please set includeFrequencyData to true with .frequency(True) if desired. \n""")
-        self._params.update({'includeDirectionalMoments': str(include).lower()})
-
+        self._params.update(
+            {'includeDirectionalMoments': str(include).lower()})
 
     def surface_temp(self, include: bool):
         """
@@ -471,16 +499,19 @@ class WaveDataQuery(SofarConnection):
             del self._params['endDate']
 
     def __str__(self):
-        s = f"Query for {self.spotter_id} \n" +\
-            f"  Start: {self.start_date or 'From Beginning'} \n" +\
-            f"  End: {self.end_date or 'Til Present'} \n" +\
-            "  Params:\n" +\
-            f"    id: {self._params['spotterId']}\n" +\
-            f"    limit: {self._params['limit']} \n" +\
-            f"    waves: {self._params['includeWaves']} \n" +\
-            f"    wind: {self._params['includeWindData']} \n" +\
-            f"    track: {self._params['includeTrack']} \n" +\
-            f"    frequency: {self._params['includeFrequencyData']} \n" +\
+        s = f"Query for {self.spotter_id} \n" + \
+            f"  Start: {self.start_date or 'From Beginning'} \n" + \
+            f"  End: {self.end_date or 'Til Present'} \n" + \
+            "  Params:\n" + \
+            f"    id: {self._params['spotterId']}\n" + \
+            f"    limit: {self._params['limit']} \n" + \
+            f"    waves: {self._params['includeWaves']} \n" + \
+            f"    wind: {self._params['includeWindData']} \n" + \
+            f"    barometer: {self._params['includeBarometerData']} \n" + \
+            f"    sst: {self._params['includeSurfaceTempData']} \n" + \
+            f"    microphone: {self._params['includeMicrophoneData']} \n" + \
+            f"    track: {self._params['includeTrack']} \n" + \
+            f"    frequency: {self._params['includeFrequencyData']} \n" + \
             f"    directional_moments: {self._params['includeDirectionalMoments']} \n"
 
         return s
@@ -539,7 +570,9 @@ def worker_wrapper(args):
     :return: All data for that type for all spotters in the queried period
     """
     worker_type, _ids, st_date, end_date, params = args
-    queries = [WaveDataQuery(_id, limit=500, start_date=st_date, end_date=end_date, params=params) for _id in _ids]
+    queries = [
+        WaveDataQuery(_id, limit=500, start_date=st_date, end_date=end_date,
+                      params=params) for _id in _ids]
 
     # grabbing data from all of the spotters in parallel
     pool = ThreadPool(processes=16)
@@ -564,6 +597,7 @@ def _worker(data_type):
 
     :return: A helper function able to process a query for that specific data type
     """
+
     def _helper(data_query):
         st = data_query.start_date
         end = data_query.end_date
