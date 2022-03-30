@@ -481,7 +481,8 @@ class WaveDataQuery(SofarConnection):
             f"    wind: {self._params['includeWindData']} \n" +\
             f"    track: {self._params['includeTrack']} \n" +\
             f"    frequency: {self._params['includeFrequencyData']} \n" +\
-            f"    directional_moments: {self._params['includeDirectionalMoments']} \n"
+            f"    directional_moments: {self._params['includeDirectionalMoments']} \n" +\
+            f"    surface_temp: {self._params['includeSurfaceTempData']} \n"
 
         return s
 
