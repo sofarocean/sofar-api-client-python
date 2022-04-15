@@ -575,6 +575,9 @@ def _worker(data_type):
         if data_type == 'frequency':
             dkey = 'frequencyData'
             data_query.directional_moments(True)
+        elif data_type == 'surface_temp':
+            dkey = 'surfaceTemp'
+            data_query.surface_temp(True)
         else:
             dkey = data_type
 
