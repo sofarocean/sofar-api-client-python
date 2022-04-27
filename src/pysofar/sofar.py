@@ -489,9 +489,9 @@ class WaveDataQuery(SofarConnection):
 # ---------------------------------- Util Functions -------------------------------------- #
 def get_and_update_spotters(_api=None):
     """
-
     :return: A list of the spotter objects associated with this account
     """
+    from itertools import repeat
 
     api = _api or SofarApi()
 
@@ -500,14 +500,14 @@ def get_and_update_spotters(_api=None):
     spot_data = api.devices
 
     pool = ThreadPool(processes=16)
-    spotters = pool.map(_spot_worker, spot_data)
+    spotters = pool.starmap(_spot_worker, zip(spot_data, repeat(api)))
     pool.close()
 
     return spotters
 
 
 # ---------------------------------- Workers -------------------------------------- #
-def _spot_worker(device: dict):
+def _spot_worker(device: dict, api: SofarApi):
     """
     Worker to grab spotter data
 
@@ -519,8 +519,9 @@ def _spot_worker(device: dict):
 
     _id = device['spotterId']
     _name = device['name']
+    _api = api
 
-    sptr = Spotter(_id, _name)
+    sptr = Spotter(_id, _name, _api)
     sptr.update()
 
     return sptr
