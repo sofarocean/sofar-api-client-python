@@ -191,9 +191,6 @@ class Spotter:
 
         self.name = _data['spotterName']
         self._mode = _data['payloadType']
-        self._latitude = _data['track'][-1]['latitude']
-        self._longitude = _data['track'][-1]['longitude']
-        self._timestamp = _data['track'][-1]['timestamp']
 
         self._battery_power = _data['batteryPower']
         self._battery_voltage = _data['batteryVoltage']
@@ -203,6 +200,15 @@ class Spotter:
         wave_data = _data['waves']
         track_data = _data['track']
         freq_data = _data['frequencyData']
+
+        if len(track_data):
+            self._latitude = _data['track'][-1]['latitude']
+            self._longitude = _data['track'][-1]['longitude']
+            self._timestamp = _data['track'][-1]['timestamp']
+        else:
+            self._latitude = None
+            self._longitude = None
+            self._timestamp = None
 
         results = {
             'wave': wave_data[-1] if len(wave_data) > 0 else None,
