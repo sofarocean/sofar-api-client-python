@@ -6,8 +6,8 @@ with open('README.md', 'r') as file:
 
 setuptools.setup(
     name='pysofar',
-    version='0.1.10',
-    license='Apache 2 Licesnse',
+    version='0.1.11',
+    license='Apache 2 License',
     install_requires=[
         'requests',
         'python-dotenv'
