@@ -16,7 +16,7 @@ class Spotter:
     """
     Class to represent a spotter object
     """
-    def __init__(self, spotter_id: str, name: str):
+    def __init__(self, spotter_id: str, name: str, session: SofarApi=None):
         """
 
         :param spotter_id: The spotter id as a string
@@ -38,7 +38,9 @@ class Spotter:
         self._humidity = None
         self._timestamp = None
 
-        self._session = SofarApi()
+        if session is None:
+            session = SofarApi()
+        self._session = session
 
     # -------------------------- Properties -------------------------------------- #
     @property
