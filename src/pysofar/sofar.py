@@ -587,7 +587,6 @@ def _worker(data_type):
         while st < end:
             _query = data_query.execute()
 
-            lim = _query['limit']
             results = _query[dkey]
 
             for dt in results:
@@ -597,8 +596,6 @@ def _worker(data_type):
 
             # break if no results are returned
             if len(results) == 0:
-                # previous break condition was
-                # len(results) < lim
                 break
 
             st = results[-1]['timestamp']
