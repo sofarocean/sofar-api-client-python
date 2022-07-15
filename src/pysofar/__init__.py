@@ -1,10 +1,10 @@
 """
-This file is part of pysofar: A client for interfacing with Sofar Oceans Spotter API
+This file is part of pysofar: A client for interfacing with Sofar Ocean's Spotter API
 
-Copyright (C) 2019
+Copyright 2019-2022
 Sofar Ocean Technologies
 
-Authors: Mike Sosa
+Authors: Mike Sosa et al.
 """
 import os
 import dotenv
@@ -14,8 +14,8 @@ import json
 def get_token():
     # config values
     userpath = os.path.expanduser("~")
-    enviromentFile = os.path.join(userpath, 'sofar_api.env')
-    dotenv.load_dotenv(enviromentFile)
+    environmentFile = os.path.join(userpath, 'sofar_api.env')
+    dotenv.load_dotenv(environmentFile)
     token = os.getenv('WF_API_TOKEN')
     _wavefleet_token = token
 
@@ -25,13 +25,13 @@ def get_token():
 def get_endpoint():
     _endpoint = os.getenv('WF_URL')
     if _endpoint is None:
-        _endpoint = 'https://wavefleet.spoondriftspotter.co/api'
+        _endpoint = 'https://api.sofarocean.com/api'
     return _endpoint
 
 
 class SofarConnection:
     """
-    Base Parent class for connections to the api
+    Base Parent class for connections to the API
     Use SofarApi in sofar.py in practice
     """
     def __init__(self, custom_token=None):
