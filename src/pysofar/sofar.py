@@ -333,7 +333,9 @@ class WaveDataQuery(SofarConnection):
             'includeFrequencyData': 'false',
             'includeDirectionalMoments': 'false',
             'includeSurfaceTempData': 'false',
-            'includeNonObs': 'false'
+            'includeNonObs': 'false',
+            'includeMicrophoneData': 'false',
+            'includeBarometerData': 'false'
         }
         if params is not None:
             self._params.update(params)
@@ -367,6 +369,20 @@ class WaveDataQuery(SofarConnection):
         """
         self._limit = value
         self._params.update({'limit': value})
+
+    def barometer(self, include: bool):
+        """
+
+        :param include: True if you want the query to include waves
+        """
+        self._params.update({'includeBarometerData': str(include).lower()})
+
+    def microphone(self, include: bool):
+        """
+
+        :param include: True if you want the query to include waves
+        """
+        self._params.update({'includeMicrophoneData': str(include).lower()})
 
     def waves(self, include: bool):
         """
@@ -471,16 +487,19 @@ class WaveDataQuery(SofarConnection):
             del self._params['endDate']
 
     def __str__(self):
-        s = f"Query for {self.spotter_id} \n" +\
-            f"  Start: {self.start_date or 'From Beginning'} \n" +\
-            f"  End: {self.end_date or 'Til Present'} \n" +\
-            "  Params:\n" +\
-            f"    id: {self._params['spotterId']}\n" +\
-            f"    limit: {self._params['limit']} \n" +\
-            f"    waves: {self._params['includeWaves']} \n" +\
-            f"    wind: {self._params['includeWindData']} \n" +\
-            f"    track: {self._params['includeTrack']} \n" +\
-            f"    frequency: {self._params['includeFrequencyData']} \n" +\
+        s = f"Query for {self.spotter_id} \n" + \
+            f"  Start: {self.start_date or 'From Beginning'} \n" + \
+            f"  End: {self.end_date or 'Til Present'} \n" + \
+            "  Params:\n" + \
+            f"    id: {self._params['spotterId']}\n" + \
+            f"    limit: {self._params['limit']} \n" + \
+            f"    waves: {self._params['includeWaves']} \n" + \
+            f"    wind: {self._params['includeWindData']} \n" + \
+            f"    barometer: {self._params['includeBarometerData']} \n" + \
+            f"    sst: {self._params['includeSurfaceTempData']} \n" + \
+            f"    microphone: {self._params['includeMicrophoneData']} \n" + \
+            f"    track: {self._params['includeTrack']} \n" + \
+            f"    frequency: {self._params['includeFrequencyData']} \n" + \
             f"    directional_moments: {self._params['includeDirectionalMoments']} \n"
 
         return s
