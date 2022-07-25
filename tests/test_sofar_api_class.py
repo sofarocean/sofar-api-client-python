@@ -61,7 +61,9 @@ def test_get_all_wave_data():
 
 def test_get_all_wind_data():
     # Test that all wind data over all time is able to be queried
-    dat = api.get_wind_data()
+    st = '2021-05-02'
+    end = '2021-07-10'
+    dat = api.get_wind_data(start_date=st, end_date=end)
 
     assert dat is not None
     assert isinstance(dat, dict)
@@ -71,8 +73,8 @@ def test_get_all_wind_data():
 
 def test_get_all_tracking_data():
     # Test that all tracking data is able to be queried in a time range
-    st = '2019-05-02'
-    end = '2019-07-10'
+    st = '2021-05-02'
+    end = '2021-06-10'
     dat = api.get_track_data(start_date=st, end_date=end)
 
     assert dat is not None
@@ -83,7 +85,9 @@ def test_get_all_tracking_data():
 
 def test_get_all_frequency_data():
     # Test that all frequency data is able to be queried in a time range
-    dat = api.get_frequency_data()
+    st = '2021-06-08'
+    end = '2021-06-10'
+    dat = api.get_frequency_data(start_date=st, end_date=end)
 
     assert dat is not None
     assert isinstance(dat, dict)
