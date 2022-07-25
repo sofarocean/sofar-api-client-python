@@ -1,12 +1,12 @@
 """
-This file is part of pysofar: A client for interfacing with Sofar Oceans Spotter API
+This file is part of pysofar: A client for interfacing with Sofar Ocean's Spotter API
 
-Contents: Classes for representing devices and data grabbed from the api
+Contents: Classes for representing devices and data grabbed from the API
 
-Copyright (C) 2019
+Copyright 2019-2022
 Sofar Ocean Technologies
 
-Authors: Mike Sosa
+Authors: Mike Sosa et al.
 """
 from pysofar.sofar import SofarApi, WaveDataQuery
 
@@ -14,21 +14,21 @@ from pysofar.sofar import SofarApi, WaveDataQuery
 # --------------------- Devices ----------------------------------------------#
 class Spotter:
     """
-    Class to represent a spotter object
+    Class to represent a Spotter object
     """
     def __init__(self, spotter_id: str, name: str, session: SofarApi=None):
         """
 
-        :param spotter_id: The spotter id as a string
-        :param name: The name of the spotter
+        :param spotter_id: The Spotter id as a string
+        :param name: The name of the Spotter
         """
         self.id = spotter_id
         self.name = name
 
-        # cached spotter data
+        # cached Spotter data
         self._data = None
 
-        # spotter parameters
+        # Spotter parameters
         self._mode = None
         self._latitude = None
         self._longitude = None
@@ -46,20 +46,20 @@ class Spotter:
     @property
     def mode(self):
         """
-        The tracking type of the spotter.
+        The tracking type of the Spotter.
         3 Modes are possible:
             - waves_standard
             - waves_spectrum (Includes spectrum data)
             - tracking
 
-        :return: The current mode of the spotter
+        :return: The current mode of the Spotter
         """
         return self._mode
 
     @mode.setter
     def mode(self, value):
         """
-        Sets the mode of the spotter
+        Sets the mode of the Spotter
 
         :param value: Either 'full , 'waves', or 'track' else throws exception
         """
@@ -98,7 +98,7 @@ class Spotter:
     def battery_voltage(self):
         """
 
-        :return: Battery voltage of the spotter
+        :return: Battery voltage of the Spotter
         """
         return self._battery_voltage
 
@@ -141,7 +141,7 @@ class Spotter:
     @property
     def timestamp(self):
         """
-        The time value at which the current spotter last recorded data
+        The time value at which the current Spotter last recorded data
 
         :return: ISO8601 formatted string
         """
@@ -164,15 +164,15 @@ class Spotter:
     # -------------------------- API METHODS -------------------------------------- #
     def change_name(self, new_name: str):
         """
-        Updates the spotters name in the Sofar Database
+        Updates the Spotter's name in the Sofar database
 
-        :param new_name: The new desired spotter name
+        :param new_name: The new desired Spotter name
         """
         self.name = self._session.update_spotter_name(self.id, new_name)
 
     def download_datafile(self, start_date, end_date):
         """
-        Download a datafile container this spotters data from start_date to end_date
+        Download a datafile container this Spotter's data from start_date to end_date
 
         :param start_date: Start date string
         :param end_date: End date String
@@ -182,9 +182,9 @@ class Spotter:
 
     def update(self):
         """
-        Updates this spotter's attribute values.
+        Updates this Spotter's attribute values.
 
-        :return: The data last recorded by the current spotter
+        :return: The data last recorded by the current Spotter
         """
         # TODO: also add the latest data for this (Since it does return it)
         _data = self._session.get_latest_data(self.id)
@@ -254,18 +254,18 @@ class Spotter:
                   interpolate_utc: bool = False,
                   interpolate_period_seconds: int = 3600):
         """
-        Grabs the requested data for this spotter based on the given keyword arguments
+        Grabs the requested data for this Spotter based on the given keyword arguments
 
         :param limit: The limit for data to grab. Defaults to 20, For frequency data max of 100 samples at a time,
                       else, 500 samples. If you send values over the limit, it will automatically limit for you
-        :param start_date: ISO 8601 formatted date string. If not included defaults to beginning of spotters history
-        :param end_date: ISO 8601 formatted date string. If not included defaults to end of spotter history
+        :param start_date: ISO 8601 formatted date string. If not included defaults to beginning of Spotter's history
+        :param end_date: ISO 8601 formatted date string. If not included defaults to end of Spotter history
         :param include_waves: Defaults to True. Set to False if you do not want the wave data in the returned response
         :param include_wind: Defaults to False. Set to True if you want wind data in the returned response
         :param include_track: Defaults to False. Set to True if you want tracking data in the returned response
-        :param include_frequency_data: Defaults to False. Only applies if the spotter is in 'Full Waves mode' Set to
+        :param include_frequency_data: Defaults to False. Only applies if the Spotter is in 'Full Waves mode' Set to
                                         True if you want frequency data in the returned response
-        :param include_directional_moments: Defaults to False. Only applies if the spotter is in 'Full Waves mode' and
+        :param include_directional_moments: Defaults to False. Only applies if the Spotter is in 'Full Waves mode' and
                                             'include_frequency_data' is True. Set True if you want the frequency data
                                             returned to also include directional moments
         :param include_surface_temp_data: Defaults to False. Set to True if your device is a v2 model or newer with the

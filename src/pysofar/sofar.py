@@ -1,12 +1,12 @@
 """
-This file is part of pysofar: A client for interfacing with Sofar Oceans Spotter API
+This file is part of pysofar: A client for interfacing with Sofar Ocean's Spotter API
 
 Contents: Classes used to connect to the Sofar API and return data
 
-Copyright (C) 2019
+Copyright 2019-2022
 Sofar Ocean Technologies
 
-Authors: Mike Sosa
+Authors: Mike Sosa et al.
 """
 from datetime import datetime
 from itertools import chain
