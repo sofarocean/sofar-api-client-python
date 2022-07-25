@@ -14,6 +14,8 @@ from multiprocessing.pool import ThreadPool
 from pysofar import SofarConnection
 from pysofar.tools import parse_date
 from pysofar.wavefleet_exceptions import QueryError, CouldNotRetrieveFile
+from typing import List, Tuple, Dict
+import warnings
 
 
 class SofarApi(SofarConnection):
@@ -224,6 +226,48 @@ class SofarApi(SofarConnection):
         return self._get_all_data(['waves', 'wind', 'frequency', 'track'], start_date, end_date, params)
 
     def get_spotters(self): return get_and_update_spotters(_api=self)
+
+    def search(self, shape:str, shape_params:List[Tuple], start_date:str, end_date:str,
+               radius=None, page_size=100,return_generator=False):
+
+        if shape not in ('circle','envelope'):
+            raise TypeError('Shape needs to be one of type Circle or Envelope')
+
+        if page_size > 500:
+            warnings.warn('Maximum page size is 500')
+            page_size=500
+
+        if shape == 'circle' and radius is None:
+            raise ValueError('Radius needs to be set when shape is circle')
+
+        # flatten
+        if shape == 'envelope':
+            vertices = []
+            for point in shape_params:
+                vertices += point
+        elif shape == 'circle':
+            vertices = shape_params
+
+        params = {
+            'shape':shape,
+            # convert list to a comma seperated string of values. Requests does not
+            # like iterators as argument.
+            'shapeParams':','.join([str(x) for x in vertices]),
+            'startDate':start_date,
+            'endDate':end_date,
+            'pageSize':page_size,
+            'radius':radius
+        }
+        def get_function(endpoint_suffix,params ):
+            scode, data = self._get(endpoint_suffix, params=params)
+            if scode != 200:
+                raise QueryError(data['message'])
+            return data
+
+        if return_generator:
+            return unpaginate(get_function,'search',params)
+        else:
+            return list(unpaginate(get_function,'search',params))
 
     # ---------------------------------- Helper Functions -------------------------------------- #
     @property
@@ -632,3 +676,39 @@ def _worker(data_type):
         return query_data
 
     return _helper
+
+
+def unpaginate( get_function, endpoint_suffix , params )->Dict:
+    """
+    Generator function to unpaginate a paginated request.
+
+    Note:
+    It is a little ugly now with the removing of the endpoint prefix so that
+    the _get function can append it again. Right now it looks like the paginated
+    server returns http instead of https in the url so this may actually be a
+    good thing.
+
+    :param get_function: the _get fuction that takes an endpoint suffic and params as arguments
+    :param endpoint_suffix: endpoint to hit from the Sofar Api
+    :param params: dict of additional query parameters to write beyond default values
+
+    :return: track data as a list
+    """
+    suffix = endpoint_suffix
+    while True:
+        page = get_function( suffix, params)
+
+        for item in page['data']:
+            yield item
+
+        if page['metadata']['page']['hasMoreData']:
+            url = page['metadata']['page']['nextPage']
+            # here we remove the prefix, but keep everything else in the url
+            # returned by wavefleet.
+            suffix = endpoint_suffix + url.split(endpoint_suffix)[1]
+
+            # parameters are no longer needed as these are already encoded
+            # in the given url.
+            params = None
+        else:
+            break
