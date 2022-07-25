@@ -14,7 +14,7 @@ from multiprocessing.pool import ThreadPool
 from pysofar import SofarConnection
 from pysofar.tools import parse_date
 from pysofar.wavefleet_exceptions import QueryError, CouldNotRetrieveFile
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import warnings
 
 
@@ -678,7 +678,7 @@ def _worker(data_type):
     return _helper
 
 
-def unpaginate( get_function, endpoint_suffix , params ):
+def unpaginate( get_function, endpoint_suffix , params )->Dict:
     """
     Generator function to unpaginate a paginated request.
 
