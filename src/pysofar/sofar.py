@@ -417,14 +417,14 @@ class WaveDataQuery(SofarConnection):
     def barometer(self, include: bool):
         """
 
-        :param include: True if you want the query to include waves
+        :param include: True if you want the query to include barometer data
         """
         self._params.update({'includeBarometerData': str(include).lower()})
 
     def microphone(self, include: bool):
         """
 
-        :param include: True if you want the query to include waves
+        :param include: True if you want the query to include microphone data
         """
         self._params.update({'includeMicrophoneData': str(include).lower()})
 
@@ -642,6 +642,12 @@ def _worker(data_type):
         elif data_type == 'surface_temp':
             dkey = 'surfaceTemp'
             data_query.surface_temp(True)
+        elif data_type == 'barometer':
+            dkey = 'barometerData'
+            data_query.barometer(True)
+        elif data_type == 'microphone':
+            dkey = 'microphoneData'
+            data_query.microphone(True)
         else:
             dkey = data_type
 
