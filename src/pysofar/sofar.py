@@ -377,6 +377,7 @@ class WaveDataQuery(SofarConnection):
             'includeFrequencyData': 'false',
             'includeDirectionalMoments': 'false',
             'includeSurfaceTempData': 'false',
+            'includeSpikes': 'false',            
             'includeNonObs': 'false',
             'includeMicrophoneData': 'false',
             'includeBarometerData': 'false'
@@ -477,6 +478,13 @@ class WaveDataQuery(SofarConnection):
         :param include: True if you want the query to include surface temp data
         """
         self._params.update({'includeSurfaceTempData': str(include).lower()})
+
+    def spikes(self, include: bool):
+        """
+
+        :param include: True if you want the query to include data points exceeding our spike filter
+        """
+        self._params.update({'includeSpikes': str(include).lower()})
 
     def smooth_wave_data(self, include: bool):
         """
