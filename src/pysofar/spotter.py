@@ -246,8 +246,9 @@ class Spotter:
                   include_track: bool = False, include_frequency_data: bool = False,
                   include_directional_moments: bool = False,
                   include_surface_temp_data: bool = False,
-                  include_barometer_data=False,
-                  include_microphone_data=False,
+                  include_spikes: bool = False,
+                  include_barometer_data = False,
+                  include_microphone_data = False,
                   smooth_wave_data: bool = False,
                   smooth_sg_window: int = 135,
                   smooth_sg_order: int = 4,
@@ -272,6 +273,8 @@ class Spotter:
                                           SST sensor installed
         :param include_barometer_data: Defaults to False. Set to True if your device is a v3 model or newer with the
                                        barometer installed
+        :param include_spikes: Defaults to False. Set to True if you wish to include data points that our system has
+                                        identified as a potentially unwanted spike.
 
         :return: Data as a json based on the given query paramters
         """
@@ -282,6 +285,7 @@ class Spotter:
         _query.frequency(include_frequency_data)
         _query.directional_moments(include_directional_moments)
         _query.surface_temp(include_surface_temp_data)
+        _query.spikes(include_spikes)
         _query.barometer(include_barometer_data)
         _query.microphone(include_microphone_data)
         _query.smooth_wave_data(smooth_wave_data)
