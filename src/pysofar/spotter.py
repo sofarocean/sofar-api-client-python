@@ -220,30 +220,34 @@ class Spotter:
     def latest_data(self, 
                     include_wind: bool = False, 
                     include_directional_moments: bool = False,
-                    include_barometer_data: bool = False):
+                    include_barometer_data: bool = False,
+                    include_surface_temp_data: bool = False):
         """
 
         :param include_wind:
         :param include_directional_moments:
         :param include_barometer_data:
+        :param include_surface_temp_data: 
         :return:
         """
         _data = self._session.get_latest_data(self.id,
                                               include_wind_data=include_wind,
                                               include_directional_moments=include_directional_moments,
-                                              include_barometer_data=include_barometer_data)
+                                              include_barometer_data=include_barometer_data,
+                                              include_surface_temp_data=include_surface_temp_data)
 
         wave_data = _data['waves']
         track_data = _data['track']
         freq_data = _data['frequencyData']
         baro_data = _data.get('barometerData', None)
-        print(_data.keys())
+        sst_data = _data.get('surfaceTemp', None)
 
         results = {
             'wave': wave_data[-1] if len(wave_data) > 0 else None,
             'tracking': track_data[-1] if len(track_data) > 0 else None,
             'frequency': freq_data[-1] if len(freq_data) > 0 else None,
-            'barometer': baro_data[-1] if len(baro_data) > 0 else None
+            'barometer': baro_data[-1] if len(baro_data) > 0 else None,
+            'surfaceTemp': sst_data[-1] if len(sst_data) > 0 else None
         }
 
         return results
