@@ -87,13 +87,16 @@ class SofarApi(SofarConnection):
 
     def get_latest_data(self, spotter_id: str,
                         include_wind_data: bool = False,
-                        include_directional_moments: bool = False):
+                        include_directional_moments: bool = False,
+                        include_barometer_data: bool = False,
+                        ):
         """
 
         :param spotter_id: The string id of the spotter
         :param include_wind_data: Defaults to False. Set to True if you want the latest data to include wind data
         :param include_directional_moments: Defaults to False. Only applies if the spotter is in 'full_waves' mode.
                                             Set to True if you want the latest data to include directional moments
+        :param include_barometer_data: Defaults to False.  Only works for barometer-equipped Spotters.
 
         :return: The latest data values based on the given parameters from the requested spotter
         """
@@ -104,6 +107,9 @@ class SofarApi(SofarConnection):
 
         if include_wind_data:
             params['includeWindData'] = 'true'
+
+        if include_barometer_data:
+            params['includeBarometerData'] = 'true'
 
         scode, results = self._get('/latest-data', params=params)
 
