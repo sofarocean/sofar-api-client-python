@@ -221,12 +221,14 @@ class Spotter:
                     include_wind: bool = False, 
                     include_directional_moments: bool = False,
                     include_barometer_data: bool = False,
+                    include_partition_data: bool = False,
                     include_surface_temp_data: bool = False):
         """
 
         :param include_wind:
         :param include_directional_moments:
         :param include_barometer_data:
+        :param include_partition_data:
         :param include_surface_temp_data: 
         :return:
         """
@@ -234,12 +236,14 @@ class Spotter:
                                               include_wind_data=include_wind,
                                               include_directional_moments=include_directional_moments,
                                               include_barometer_data=include_barometer_data,
+                                              include_partition_data=include_partition_data,
                                               include_surface_temp_data=include_surface_temp_data)
 
         wave_data = _data['waves']
         track_data = _data['track']
         freq_data = _data['frequencyData']
         baro_data = _data.get('barometerData', None)
+        partition_data = _data.get('partitionData', None)
         sst_data = _data.get('surfaceTemp', None)
 
         results = {
@@ -247,6 +251,7 @@ class Spotter:
             'tracking': track_data[-1] if len(track_data) > 0 else None,
             'frequency': freq_data[-1] if len(freq_data) > 0 else None,
             'barometer': baro_data[-1] if len(baro_data) > 0 else None,
+            'partition': partition_data[-1] if len(partition_data) > 0 else None,
             'surfaceTemp': sst_data[-1] if len(sst_data) > 0 else None
         }
 

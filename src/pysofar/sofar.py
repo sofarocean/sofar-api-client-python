@@ -89,6 +89,7 @@ class SofarApi(SofarConnection):
                         include_wind_data: bool = False,
                         include_directional_moments: bool = False,
                         include_barometer_data: bool = False,
+                        include_partition_data: bool = False,
                         include_surface_temp_data: bool = False
                         ):
         """
@@ -98,6 +99,7 @@ class SofarApi(SofarConnection):
         :param include_directional_moments: Defaults to False. Only applies if the spotter is in 'full_waves' mode.
                                             Set to True if you want the latest data to include directional moments
         :param include_barometer_data: Defaults to False. Only applies to barometer-equipped Spotters.
+        :param include_partition_data: Defaulse to False. Only applies to Spotters in Waves:Partition mode.
         :param include_surface_temp_data: Defaults to False. Only applies to SST sensor-equipped Spotters.
 
         :return: The latest data values based on the given parameters from the requested spotter
@@ -112,6 +114,9 @@ class SofarApi(SofarConnection):
 
         if include_barometer_data:
             params['includeBarometerData'] = 'true'
+
+        if include_partition_data:
+            params['includePartitionData'] = 'true'
 
         if include_surface_temp_data:
             params['includeSurfaceTempData'] = 'true'
