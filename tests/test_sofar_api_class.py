@@ -1,12 +1,13 @@
 """
-This file is part of pysofar: A client for interfacing with Sofar Oceans Spotter API
+This file is part of pysofar: 
+A client for interfacing with Sofar Ocean Technologies Spotter API
 
 Contents: Tests for device endpoints
 
-Copyright (C) 2019
+Copyright (C) 2019-2023
 Sofar Ocean Technologies
 
-Authors: Mike Sosa
+Authors: Mike Sosa et al
 """
 from pysofar import wavefleet_exceptions
 from pysofar.sofar import SofarApi
@@ -112,12 +113,13 @@ def test_get_all_data():
     
 def test_get_sensor_data():
     # Test that getting sensor data in a time range works
-    spotter_id = 'SPOT-9999'
-    st = '2021-07-18'
-    end = '2021-07-19'
+    spotter_id = 'SPOT-30081D'
+    st = '2022-08-01'
+    end = '2022-08-02'
     
     dat = api.get_sensor_data(spotter_id, start_date=st, end_date=end)
     
     assert dat is not None
+    print(dat)
     assert 'sensorPosition' in dat[-1]
     
