@@ -10,9 +10,9 @@ Authors: Mike Sosa
 """
 from pysofar.sofar import WaveDataQuery
 
-st = '2019-05-02'
-end = '2019-05-10'
-q = WaveDataQuery('SPOT-0350', limit=100, start_date=st, end_date=end)
+st = '2023-05-02'
+end = '2023-05-10'
+q = WaveDataQuery('SPOT-30344R', limit=100, start_date=st, end_date=end)
 q.wind(True)
 
 
@@ -28,7 +28,7 @@ def test_query_execute():
 
 
 def test_query_no_dates():
-    # resturned latest data first
+    # returned latest data first
     q.limit(10)
     q.clear_start_date()
     q.clear_end_date()
@@ -42,7 +42,7 @@ def test_query_no_dates():
 
 
 def test_query_no_start():
-    # resturned
+    # returned
     q.limit(10)
 
     q.clear_start_date()
