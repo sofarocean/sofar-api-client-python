@@ -187,6 +187,7 @@ class Spotter:
         :return: The data last recorded by the current Spotter
         """
         # TODO: also add the latest data for this (Since it does return it)
+        # TODO: disambiguate & de-duplicate update() vs latest_data()
         _data = self._session.get_latest_data(self.id)
 
         self.name = _data['spotterName']
@@ -217,25 +218,48 @@ class Spotter:
         }
         self._data = results
 
-    def latest_data(self, include_wind: bool = False, include_directional_moments: bool = False):
+    def latest_data(self, 
+                    include_wind: bool = False, 
+                    include_directional_moments: bool = False,
+                    include_barometer_data: bool = False,
+                    include_partition_data: bool = False,
+                    include_surface_temp_data: bool = False):
         """
+        Updates and returns the latest data for this Spotter.
+        
+        :param include_wind: Defaults to False. Set to True if you want the latest data to include wind data
+        :param include_directional_moments: Defaults to False. Only applies if the Spotter is in 'full_waves' mode.
+                                            Set to True if you want the latest data to include directional moments
+        :param include_barometer_data: Defaults to False. Only applies to barometer-equipped Spotters.
+        :param include_partition_data: Defaulse to False. Only applies to Spotters in Waves:Partition mode.
+        :param include_surface_temp_data: Defaults to False. Only applies to SST sensor-equipped Spotters.
 
-        :param include_wind:
-        :param include_directional_moments:
-        :return:
+        :return: The latest data values based on the given parameters from this Spotter
         """
         _data = self._session.get_latest_data(self.id,
                                               include_wind_data=include_wind,
-                                              include_directional_moments=include_directional_moments)
+                                              include_directional_moments=include_directional_moments,
+                                              include_barometer_data=include_barometer_data,
+                                              include_partition_data=include_partition_data,
+                                              include_surface_temp_data=include_surface_temp_data)
 
         wave_data = _data['waves']
         track_data = _data['track']
         freq_data = _data['frequencyData']
+        # the following fields are not included when not requested, so default to empty list
+        wind_data = _data.get('wind', [])
+        baro_data = _data.get('barometerData', [])
+        partition_data = _data.get('partitionData', [])
+        sst_data = _data.get('surfaceTemp', [])
 
         results = {
             'wave': wave_data[-1] if len(wave_data) > 0 else None,
             'tracking': track_data[-1] if len(track_data) > 0 else None,
-            'frequency': freq_data[-1] if len(freq_data) > 0 else None
+            'frequency': freq_data[-1] if len(freq_data) > 0 else None,
+            'wind': wind_data[-1] if len(wind_data) > 0 else None,
+            'barometer': baro_data[-1] if len(baro_data) > 0 else None,
+            'partition': partition_data[-1] if len(partition_data) > 0 else None,
+            'surfaceTemp': sst_data[-1] if len(sst_data) > 0 else None
         }
 
         return results

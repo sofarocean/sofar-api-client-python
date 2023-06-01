@@ -36,7 +36,7 @@ class SofarApi(SofarConnection):
     def get_device_location_data(self):
         """
 
-        :return: The most recent locations of all spotters belonging to this account
+        :return: The most recent locations of all Spotters belonging to this account
         """
         return self._device_radius()
 
@@ -44,7 +44,7 @@ class SofarApi(SofarConnection):
     def grab_datafile(self, spotter_id: str, start_date: str, end_date: str):
         """
 
-        :param spotter_id: The string id of the spotter
+        :param spotter_id: The string id of the Spotter
         :param start_date: ISO8601 formatted start date of the data
         :param end_date: ISO8601 formatted end date of the data
 
@@ -87,15 +87,22 @@ class SofarApi(SofarConnection):
 
     def get_latest_data(self, spotter_id: str,
                         include_wind_data: bool = False,
-                        include_directional_moments: bool = False):
+                        include_directional_moments: bool = False,
+                        include_barometer_data: bool = False,
+                        include_partition_data: bool = False,
+                        include_surface_temp_data: bool = False
+                        ):
         """
 
-        :param spotter_id: The string id of the spotter
+        :param spotter_id: The string id of the Spotter
         :param include_wind_data: Defaults to False. Set to True if you want the latest data to include wind data
-        :param include_directional_moments: Defaults to False. Only applies if the spotter is in 'full_waves' mode.
+        :param include_directional_moments: Defaults to False. Only applies if the Spotter is in 'full_waves' mode.
                                             Set to True if you want the latest data to include directional moments
+        :param include_barometer_data: Defaults to False. Only applies to barometer-equipped Spotters.
+        :param include_partition_data: Defaulse to False. Only applies to Spotters in Waves:Partition mode.
+        :param include_surface_temp_data: Defaults to False. Only applies to SST sensor-equipped Spotters.
 
-        :return: The latest data values based on the given parameters from the requested spotter
+        :return: The latest data values based on the given parameters from the requested Spotter
         """
         params = {'spotterId': spotter_id}
 
@@ -104,6 +111,15 @@ class SofarApi(SofarConnection):
 
         if include_wind_data:
             params['includeWindData'] = 'true'
+
+        if include_barometer_data:
+            params['includeBarometerData'] = 'true'
+
+        if include_partition_data:
+            params['includePartitionData'] = 'true'
+
+        if include_surface_temp_data:
+            params['includeSurfaceTempData'] = 'true'
 
         scode, results = self._get('/latest-data', params=params)
 
@@ -117,11 +133,11 @@ class SofarApi(SofarConnection):
     def get_sensor_data(self, spotter_id: str, start_date: str, end_date: str):
         """
 
-        :param spotter_id: The string id of the spotter
+        :param spotter_id: The string id of the Spotter
         :param start_date: ISO8601 formatted start date of the data
         :param end_date: ISO8601 formatted end date of the data
 
-        :return: Data as a json from the requested spotter
+        :return: Data as a json from the requested Spotter
         """
         
         params = {
@@ -141,10 +157,10 @@ class SofarApi(SofarConnection):
 
     def update_spotter_name(self, spotter_id, new_spotter_name):
         """
-        Update the name of a spotter
+        Update the name of a Spotter
 
-        :param spotter_id: The string id of the spotter whose name you want to change
-        :param new_spotter_name: The new name to give to the requested spotter
+        :param spotter_id: The string id of the Spotter whose name you want to change
+        :param new_spotter_name: The new name to give to the requested Spotter
 
         :return: The new name if the query succeeds else throws an error
         """
@@ -167,7 +183,7 @@ class SofarApi(SofarConnection):
     # ---------------------------------- Multi Spotter Endpoints -------------------------------------- #
     def get_wave_data(self, start_date: str = None, end_date: str = None, params: dict = None):
         """
-        Get all wave data for related spotters
+        Get all wave data for related Spotters
 
         :param start_date: ISO8601 start date of data period
         :param end_date: ISO8601 end date of data period
@@ -179,7 +195,7 @@ class SofarApi(SofarConnection):
 
     def get_wind_data(self, start_date: str = None, end_date: str = None, params: dict = None):
         """
-        Get all wind data for related spotters
+        Get all wind data for related Spotters
 
         :param start_date: ISO8601 start date of data period
         :param end_date: ISO8601 end date of data period
@@ -191,7 +207,7 @@ class SofarApi(SofarConnection):
 
     def get_frequency_data(self, start_date: str = None, end_date: str = None, params: dict = None):
         """
-        Get all Frequency data for related spotters
+        Get all Frequency data for related Spotters
 
         :param start_date: ISO8601 start date of data period
         :param end_date: ISO8601 end date of data period
@@ -203,7 +219,7 @@ class SofarApi(SofarConnection):
 
     def get_track_data(self, start_date: str = None, end_date: str = None, params: dict = None):
         """
-        Get all track data for related spotters
+        Get all track data for related Spotters
 
         :param start_date: ISO8601 start date of data period
         :param end_date: ISO8601 end date of data period
@@ -215,7 +231,7 @@ class SofarApi(SofarConnection):
 
     def get_all_data(self, start_date: str = None, end_date: str = None, params: dict = None):
         """
-        Get all data for related spotters
+        Get all data for related Spotters
 
         :param start_date: ISO8601 start date of data period
         :param end_date: ISO8601 end date of data period
@@ -313,7 +329,7 @@ class SofarApi(SofarConnection):
         return spot_data
 
     def _get_all_data(self, worker_names: list, start_date: str = None, end_date: str = None, params: dict = None):
-        # helper function to return another function used for grabbing all data from spotters in a period
+        # helper function to return another function used for grabbing all data from Spotters in a period
         def helper(_name):
             _ids = self.device_ids
 
@@ -345,12 +361,12 @@ class WaveDataQuery(SofarConnection):
 
     def __init__(self, spotter_id: str, limit: int = 20, start_date=_MISSING, end_date=_MISSING, params=None):
         """
-        Query the Sofar api for spotter data
+        Query the Sofar API for Spotter data
 
-        :param spotter_id: String id of the spotter to query for
+        :param spotter_id: String id of the Spotter to query for
         :param limit: The limit of data to query. Defaults to 20, max of 100 for frequency data, max of 500 otherwise
         :param start_date: ISO8601 formatted string for start date, otherwise if not included, defaults to
-                            a date arbitrarily far back to include all spotter data
+                            a date arbitrarily far back to include all Spotter data
         :param end_date: ISO8601 formatted string for end date, otherwise if not included defaults to present
         :param params: Defaults to None. Parameters to overwrite/add to the default query parameter set
         """
@@ -465,7 +481,7 @@ class WaveDataQuery(SofarConnection):
         if include and not self._params['includeFrequencyData']:
             print("""Warning: You have currently selected the query to include directional moment data however
                      frequency data is not currently included. \n
-                     Directional moment data only applies if the spotter is in full waves/waves spectrum mode. \n
+                     Directional moment data only applies if the Spotter is in full waves/waves spectrum mode. \n
                      Since the query does not include frequency data (of which directional moments are a subset)
                      the data you have requested will not be included. \n
                      Please set includeFrequencyData to true with .frequency(True) if desired. \n""")
@@ -560,14 +576,14 @@ class WaveDataQuery(SofarConnection):
 # ---------------------------------- Util Functions -------------------------------------- #
 def get_and_update_spotters(_api=None):
     """
-    :return: A list of the spotter objects associated with this account
+    :return: A list of the Spotter objects associated with this account
     """
     from itertools import repeat
 
     api = _api or SofarApi()
 
     # grab device id's and query for device data
-    # initialize spotter objects
+    # initialize Spotter objects
     spot_data = api.devices
 
     pool = ThreadPool(processes=16)
@@ -580,9 +596,9 @@ def get_and_update_spotters(_api=None):
 # ---------------------------------- Workers -------------------------------------- #
 def _spot_worker(device: dict, api: SofarApi):
     """
-    Worker to grab spotter data
+    Worker to grab Spotter data
 
-    :param device: Dictionary containing the spotter id and name
+    :param device: Dictionary containing the Spotter id and name
 
     :return: Spotter object updated from the Sofar api with its latest data values
     """
@@ -603,17 +619,17 @@ def worker_wrapper(args):
     Wrapper for creating workers to grab lots of data
 
     :param args: Tuple of the worker_type: str (ex. 'wind', 'waves', 'frequency', 'track')
-                              _ids: list of str, which are the spotter ids
+                              _ids: list of str, which are the Spotter ids
                               st_date: str, iso 8601 formatted start date of period to query
                               end_date: str, iso 8601 formatted end date of period to query
                               params: dict, query parameters to set
 
-    :return: All data for that type for all spotters in the queried period
+    :return: All data for that type for all Spotters in the queried period
     """
     worker_type, _ids, st_date, end_date, params = args
     queries = [WaveDataQuery(_id, limit=500, start_date=st_date, end_date=end_date, params=params) for _id in _ids]
 
-    # grabbing data from all of the spotters in parallel
+    # grabbing data from all of the Spotters in parallel
     pool = ThreadPool(processes=16)
     _wrkr = _worker(worker_type)
     worker_data = pool.map(_wrkr, queries)
