@@ -9,10 +9,10 @@ Sofar Ocean Technologies
 
 Authors: Mike Sosa et al
 """
+import pytest
+
 from pysofar.sofar import SofarApi
 from pysofar.spotter import Spotter
-
-import pytest
 
 api = SofarApi()
 
