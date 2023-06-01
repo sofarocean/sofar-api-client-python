@@ -574,19 +574,20 @@ class WaveDataQuery(SofarConnection):
 
 
 # ---------------------------------- Util Functions -------------------------------------- #
-def get_and_update_spotters(_api=None):
+def get_and_update_spotters(_api=None, _processes=None):
     """
     :return: A list of the Spotter objects associated with this account
     """
     from itertools import repeat
 
     api = _api or SofarApi()
+    processes = _processes or 16
 
     # grab device id's and query for device data
     # initialize Spotter objects
     spot_data = api.devices
 
-    pool = ThreadPool(processes=16)
+    pool = ThreadPool(processes=processes)
     spotters = pool.starmap(_spot_worker, zip(spot_data, repeat(api)))
     pool.close()
 
