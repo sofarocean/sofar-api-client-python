@@ -246,10 +246,11 @@ class Spotter:
         wave_data = _data['waves']
         track_data = _data['track']
         freq_data = _data['frequencyData']
-        wind_data = _data.get('wind', None)
-        baro_data = _data.get('barometerData', None)
-        partition_data = _data.get('partitionData', None)
-        sst_data = _data.get('surfaceTemp', None)
+        # the following fields are not included when not requested, so default to empty list
+        wind_data = _data.get('wind', [])
+        baro_data = _data.get('barometerData', [])
+        partition_data = _data.get('partitionData', [])
+        sst_data = _data.get('surfaceTemp', [])
 
         results = {
             'wave': wave_data[-1] if len(wave_data) > 0 else None,
