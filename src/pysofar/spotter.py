@@ -246,6 +246,7 @@ class Spotter:
         wave_data = _data['waves']
         track_data = _data['track']
         freq_data = _data['frequencyData']
+        wind_data = _data.get('wind', None)
         baro_data = _data.get('barometerData', None)
         partition_data = _data.get('partitionData', None)
         sst_data = _data.get('surfaceTemp', None)
@@ -254,6 +255,7 @@ class Spotter:
             'wave': wave_data[-1] if len(wave_data) > 0 else None,
             'tracking': track_data[-1] if len(track_data) > 0 else None,
             'frequency': freq_data[-1] if len(freq_data) > 0 else None,
+            'wind': wind_data[-1] if len(wind_data) > 0 else None,
             'barometer': baro_data[-1] if len(baro_data) > 0 else None,
             'partition': partition_data[-1] if len(partition_data) > 0 else None,
             'surfaceTemp': sst_data[-1] if len(sst_data) > 0 else None
