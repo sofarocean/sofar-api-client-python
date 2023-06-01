@@ -24,7 +24,7 @@ def test_custom_api():
 
 
 api = SofarApi()
-latest_dat = api.get_latest_data('SPOT-0350', include_wind_data=True)
+latest_dat = api.get_latest_data('SPOT-30344R', include_wind_data=True)
 
 
 def test_get_latest_data():
@@ -42,7 +42,7 @@ def test_get_and_update_spotters():
     from pysofar.spotter import Spotter
     from pysofar.sofar import get_and_update_spotters
 
-    sptrs = get_and_update_spotters(_api=api)
+    sptrs = get_and_update_spotters(_api=api, _processes=2)
 
     assert sptrs is not None
     assert all(map(lambda x: isinstance(x, Spotter), sptrs))
