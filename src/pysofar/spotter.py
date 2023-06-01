@@ -225,9 +225,9 @@ class Spotter:
                     include_partition_data: bool = False,
                     include_surface_temp_data: bool = False):
         """
-
-        :param spotter_id: The string id of the Spotter
-        :param include_wind_data: Defaults to False. Set to True if you want the latest data to include wind data
+        Updates and returns the latest data for this Spotter.
+        
+        :param include_wind: Defaults to False. Set to True if you want the latest data to include wind data
         :param include_directional_moments: Defaults to False. Only applies if the Spotter is in 'full_waves' mode.
                                             Set to True if you want the latest data to include directional moments
         :param include_barometer_data: Defaults to False. Only applies to barometer-equipped Spotters.
