@@ -595,7 +595,7 @@ def get_and_update_spotters(_api=None, _processes=None):
 
 
 # ---------------------------------- Workers -------------------------------------- #
-def _spot_worker(device: dict, api: SofarApi):
+def _spot_worker(device: dict, api: None):
     """
     Worker to grab Spotter data
 
@@ -607,7 +607,7 @@ def _spot_worker(device: dict, api: SofarApi):
 
     _id = device['spotterId']
     _name = device['name']
-    _api = api
+    _api = api or SofarApi()
 
     sptr = Spotter(_id, _name, _api)
     sptr.update()
