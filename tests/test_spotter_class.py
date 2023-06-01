@@ -1,23 +1,25 @@
 """
-This file is part of pysofar: A client for interfacing with Sofar Oceans Spotter API
+This file is part of pysofar: 
+A client for interfacing with Sofar Ocean Technologies Spotter API
 
 Contents: Tests for device endpoints
 
-Copyright (C) 2019
+Copyright (C) 2019-2023
 Sofar Ocean Technologies
 
-Authors: Mike Sosa
+Authors: Mike Sosa et al
 """
 from pysofar.sofar import SofarApi
 from pysofar.spotter import Spotter
 
+import pytest
+
 api = SofarApi()
 
-device = Spotter('SPOT-0350', '')
-
+device = Spotter('SPOT-30344R', '')
 
 def test_spotter_update():
-    # tests the spotter updates correctly
+    # tests the Spotter updates correctly
     device.update()
 
     assert device.mode is not None
@@ -67,18 +69,18 @@ def test_spotter_edit():
 
 
 def test_spotter_mode():
-    # test the spotter mode property is set correctly
+    # test the Spotter mode property is set correctly
     device.mode = 'track'
     assert device.mode == 'tracking'
 
     device.mode = 'full'
     assert device.mode == 'waves_spectrum'
 
-
-def test_spotter_grab_data():
-    # test spotter can correctly grab data
+@pytest.mark.xfail()
+def test_spotter_grab_data_with_limit():
+    # test Spotter can correctly grab data with limit
+    # will fail if device is not owned by the token making the request
     dat = device.grab_data(limit=20)
-    print(dat)
 
     assert 'waves' in dat
     assert len(dat['waves']) <= 20
