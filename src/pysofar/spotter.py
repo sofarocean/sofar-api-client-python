@@ -187,6 +187,7 @@ class Spotter:
         :return: The data last recorded by the current Spotter
         """
         # TODO: also add the latest data for this (Since it does return it)
+        # TODO: disambiguate & de-duplicate update() vs latest_data()
         _data = self._session.get_latest_data(self.id)
 
         self.name = _data['spotterName']
