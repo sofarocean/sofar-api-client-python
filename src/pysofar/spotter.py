@@ -226,12 +226,15 @@ class Spotter:
                     include_surface_temp_data: bool = False):
         """
 
-        :param include_wind:
-        :param include_directional_moments:
-        :param include_barometer_data:
-        :param include_partition_data:
-        :param include_surface_temp_data: 
-        :return:
+        :param spotter_id: The string id of the Spotter
+        :param include_wind_data: Defaults to False. Set to True if you want the latest data to include wind data
+        :param include_directional_moments: Defaults to False. Only applies if the Spotter is in 'full_waves' mode.
+                                            Set to True if you want the latest data to include directional moments
+        :param include_barometer_data: Defaults to False. Only applies to barometer-equipped Spotters.
+        :param include_partition_data: Defaulse to False. Only applies to Spotters in Waves:Partition mode.
+        :param include_surface_temp_data: Defaults to False. Only applies to SST sensor-equipped Spotters.
+
+        :return: The latest data values based on the given parameters from this Spotter
         """
         _data = self._session.get_latest_data(self.id,
                                               include_wind_data=include_wind,
