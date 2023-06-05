@@ -50,8 +50,8 @@ def test_get_and_update_spotters():
 
 def test_get_all_wave_data():
     # Test that all wave data is able to be queried in a time range
-    st = '2019-05-02'
-    end = '2019-07-10'
+    st = '2023-05-02'
+    end = '2023-05-10'
     dat = api.get_wave_data(start_date=st, end_date=end)
 
     assert dat is not None
@@ -62,8 +62,8 @@ def test_get_all_wave_data():
 
 def test_get_all_wind_data():
     # Test that all wind data over all time is able to be queried
-    st = '2021-05-02'
-    end = '2021-07-10'
+    st = '2023-05-02'
+    end = '2023-05-10'
     dat = api.get_wind_data(start_date=st, end_date=end)
 
     assert dat is not None
