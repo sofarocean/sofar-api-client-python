@@ -74,8 +74,8 @@ def test_get_all_wind_data():
 
 def test_get_all_tracking_data():
     # Test that all tracking data is able to be queried in a time range
-    st = '2021-05-02'
-    end = '2021-06-10'
+    st = '2023-05-02'
+    end = '2023-05-10'
     dat = api.get_track_data(start_date=st, end_date=end)
 
     assert dat is not None
