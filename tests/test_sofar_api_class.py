@@ -9,23 +9,27 @@ Sofar Ocean Technologies
 
 Authors: Mike Sosa et al
 """
+import os
+
 from pysofar import wavefleet_exceptions
 from pysofar.sofar import SofarApi
 from unittest.mock import patch
 
+# try to read custom token from environment.
+# if absent, default to hard-coded value in this source module
+custom_token = os.getenv('PYSOFAR_CUSTOM_TOKEN', 'custom_api_token_here')
 
 # The custom token will fail to authenticate so use a mock to bypass the `_sync step`
 with patch.object(SofarApi, '_sync', return_value=None) as mock_method:
-    custom_api = SofarApi(custom_token='custom_api_token_here')
+    custom_token = os.getenv('PYSOFAR_CUSTOM_TOKEN', 'custom_api_token_here')
+    custom_api = SofarApi(custom_token=custom_token)
 
 def test_custom_api():
     # test that custom api token is set
-    assert custom_api.token == 'custom_api_token_here'
-
+    assert custom_api.token == custom_token
 
 api = SofarApi()
 latest_dat = api.get_latest_data('SPOT-30344R', include_wind_data=True)
-
 
 def test_get_latest_data():
     # test basic that latest_data is able to be queried
