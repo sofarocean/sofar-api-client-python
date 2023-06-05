@@ -10,6 +10,7 @@ Sofar Ocean Technologies
 Authors: Mike Sosa et al
 """
 import os
+import pytest
 
 from pysofar import wavefleet_exceptions
 from pysofar.sofar import SofarApi
@@ -18,6 +19,7 @@ from unittest.mock import patch
 # try to read custom token from environment.
 # if absent, default to hard-coded value in this source module
 custom_token = os.getenv('PYSOFAR_CUSTOM_TOKEN', 'custom_api_token_here')
+custom_spotter_id = os.getenv('PYSOFAR_TEST_SPOTTER_ID', 'SPOT-30344R')
 
 # The custom token will fail to authenticate so use a mock to bypass the `_sync step`
 with patch.object(SofarApi, '_sync', return_value=None) as mock_method:
@@ -29,7 +31,7 @@ def test_custom_api():
     assert custom_api.token == custom_token
 
 api = SofarApi()
-latest_dat = api.get_latest_data('SPOT-30344R', include_wind_data=True)
+latest_dat = api.get_latest_data(custom_spotter_id, include_wind_data=True)
 
 def test_get_latest_data():
     # test basic that latest_data is able to be queried
@@ -75,7 +77,6 @@ def test_get_all_wind_data():
     assert 'wind' in dat
     assert len(dat['wind']) > 0
 
-
 def test_get_all_tracking_data():
     # Test that all tracking data is able to be queried in a time range
     st = '2023-05-02'
@@ -87,13 +88,13 @@ def test_get_all_tracking_data():
     assert 'track' in dat
     assert len(dat['track']) > 0
 
-
+@pytest.mark.xfail(reason="A Spotter will return no frequency data if it was not in Waves:Spectrum")   
 def test_get_all_frequency_data():
     # Test that all frequency data is able to be queried in a time range
-    st = '2021-06-08'
-    end = '2021-06-10'
+    st = '2022-07-26'
+    end = '2022-08-04'
     dat = api.get_frequency_data(start_date=st, end_date=end)
-
+    print(dat.keys())
     assert dat is not None
     assert isinstance(dat, dict)
     assert 'frequency' in dat
@@ -101,7 +102,7 @@ def test_get_all_frequency_data():
 
 
 def test_get_all_data():
-    # Test that grabbing data from all spotters from all data types works
+    # Test that grabbing data from all Spotters from all data types works
     st = '2019-01-18'
     end = '2019-01-25'
 

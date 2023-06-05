@@ -9,6 +9,7 @@ Sofar Ocean Technologies
 
 Authors: Mike Sosa et al
 """
+import os
 import pytest
 
 from pysofar.sofar import SofarApi
@@ -16,7 +17,7 @@ from pysofar.spotter import Spotter
 
 api = SofarApi()
 
-device = Spotter('SPOT-30344R', '')
+device = Spotter(os.getenv('PYSOFAR_TEST_SPOTTER_ID', 'SPOT-30344R'), '', session = api)
 
 def test_spotter_update():
     # tests the Spotter updates correctly
@@ -76,10 +77,9 @@ def test_spotter_mode():
     device.mode = 'full'
     assert device.mode == 'waves_spectrum'
 
-@pytest.mark.xfail()
+@pytest.mark.xfail(reason="will fail if device is not owned by the token making the request")
 def test_spotter_grab_data_with_limit():
     # test Spotter can correctly grab data with limit
-    # will fail if device is not owned by the token making the request
     dat = device.grab_data(limit=20)
 
     assert 'waves' in dat

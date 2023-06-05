@@ -8,11 +8,13 @@ Sofar Ocean Technologies
 
 Authors: Mike Sosa et al
 """
+import os
+
 from pysofar.sofar import WaveDataQuery
 
 st = '2023-05-02'
 end = '2023-05-10'
-q = WaveDataQuery('SPOT-30344R', limit=100, start_date=st, end_date=end)
+q = WaveDataQuery(os.getenv('PYSOFAR_TEST_SPOTTER_ID', 'SPOT-30344R'), limit=100, start_date=st, end_date=end)
 q.wind(True)
 
 
