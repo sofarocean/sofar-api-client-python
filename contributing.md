@@ -55,6 +55,6 @@
     
 9. Thank you for contributing!!
 
-### Versioning  
-- Bump the semver version number in *./setup.py*
+### Versioning [for internal contributors only] 
+- Bump the [semver](https://semver.org/) version number in *./setup.py*
 - Run `build.sh`
