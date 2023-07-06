@@ -22,15 +22,14 @@ class SofarApi(SofarConnection):
     """
     Class for interfacing with the Sofar Wavefleet API
     """
+
     def __init__(self, custom_token=None):
-        if custom_token is not None:
-            super().__init__(custom_token)
-        else:
-            super().__init__()
+        super().__init__(custom_token)
 
         self.devices = []
         self.device_ids = []
         self._sync()
+
 
     # ---------------------------------- Simple Device Endpoints -------------------------------------- #
     def get_device_location_data(self):
@@ -139,7 +138,7 @@ class SofarApi(SofarConnection):
 
         :return: Data as a json from the requested Spotter
         """
-        
+
         params = {
             "spotterId": spotter_id,
             "startDate": start_date,
@@ -241,17 +240,18 @@ class SofarApi(SofarConnection):
         """
         return self._get_all_data(['waves', 'wind', 'frequency', 'track'], start_date, end_date, params)
 
-    def get_spotters(self): return get_and_update_spotters(_api=self)
+    def get_spotters(self):
+        return get_and_update_spotters(_api=self)
 
-    def search(self, shape:str, shape_params:List[Tuple], start_date:str, end_date:str,
-               radius=None, page_size=100,return_generator=False):
+    def search(self, shape: str, shape_params: List[Tuple], start_date: str, end_date: str,
+               radius=None, page_size=100, return_generator=False):
 
-        if shape not in ('circle','envelope'):
+        if shape not in ('circle', 'envelope'):
             raise TypeError('Shape needs to be one of type Circle or Envelope')
 
         if page_size > 500:
             warnings.warn('Maximum page size is 500')
-            page_size=500
+            page_size = 500
 
         if shape == 'circle' and radius is None:
             raise ValueError('Radius needs to be set when shape is circle')
@@ -265,25 +265,26 @@ class SofarApi(SofarConnection):
             vertices = shape_params
 
         params = {
-            'shape':shape,
+            'shape': shape,
             # convert list to a comma seperated string of values. Requests does not
             # like iterators as argument.
-            'shapeParams':','.join([str(x) for x in vertices]),
-            'startDate':start_date,
-            'endDate':end_date,
-            'pageSize':page_size,
-            'radius':radius
+            'shapeParams': ','.join([str(x) for x in vertices]),
+            'startDate': start_date,
+            'endDate': end_date,
+            'pageSize': page_size,
+            'radius': radius
         }
-        def get_function(endpoint_suffix,params ):
+
+        def get_function(endpoint_suffix, params):
             scode, data = self._get(endpoint_suffix, params=params)
             if scode != 200:
                 raise QueryError(data['message'])
             return data
 
         if return_generator:
-            return unpaginate(get_function,'search',params)
+            return unpaginate(get_function, 'search', params)
         else:
-            return list(unpaginate(get_function,'search',params))
+            return list(unpaginate(get_function, 'search', params))
 
     # ---------------------------------- Helper Functions -------------------------------------- #
     @property
@@ -293,14 +294,14 @@ class SofarApi(SofarConnection):
     @token.setter
     def token(self, value):
         temp = self.token
-        self.set_token(value)
+        self._set_token(value)
 
         try:
             self._sync()
         except QueryError:
             print('Authentication failed. Please check the key')
             print('Reverting to old key')
-            self.set_token(temp)
+            self._set_token(temp)
 
     def _sync(self):
         self.devices = self._devices()
@@ -337,7 +338,7 @@ class SofarApi(SofarConnection):
             st = start_date or '2000-01-01T00:00:00.000Z'
             end = end_date or datetime.utcnow()
 
-            _wrker = worker_wrapper((_name, _ids, st, end, params))
+            _wrker = worker_wrapper((_name, _ids, st, end, params), token=self.token)
             return _wrker
 
         # processing the data_types in parallel
@@ -359,7 +360,7 @@ class WaveDataQuery(SofarConnection):
     """
     _MISSING = object()
 
-    def __init__(self, spotter_id: str, limit: int = 20, start_date=_MISSING, end_date=_MISSING, params=None):
+    def __init__(self, spotter_id: str, limit: int = 20, start_date=_MISSING, end_date=_MISSING, params=None, custom_token=None):
         """
         Query the Sofar API for Spotter data
 
@@ -370,7 +371,7 @@ class WaveDataQuery(SofarConnection):
         :param end_date: ISO8601 formatted string for end date, otherwise if not included defaults to present
         :param params: Defaults to None. Parameters to overwrite/add to the default query parameter set
         """
-        super().__init__()
+        super().__init__(custom_token=custom_token)
         self.spotter_id = spotter_id
         self._limit = limit
 
@@ -393,7 +394,7 @@ class WaveDataQuery(SofarConnection):
             'includeFrequencyData': 'false',
             'includeDirectionalMoments': 'false',
             'includeSurfaceTempData': 'false',
-            'includeSpikes': 'false',            
+            'includeSpikes': 'false',
             'includeNonObs': 'false',
             'includeMicrophoneData': 'false',
             'includeBarometerData': 'false'
@@ -486,7 +487,6 @@ class WaveDataQuery(SofarConnection):
                      the data you have requested will not be included. \n
                      Please set includeFrequencyData to true with .frequency(True) if desired. \n""")
         self._params.update({'includeDirectionalMoments': str(include).lower()})
-
 
     def surface_temp(self, include: bool):
         """
@@ -614,7 +614,7 @@ def _spot_worker(device: dict, api: SofarApi):
     return sptr
 
 
-def worker_wrapper(args):
+def worker_wrapper(args, token=None):
     """
     Wrapper for creating workers to grab lots of data
 
@@ -624,10 +624,12 @@ def worker_wrapper(args):
                               end_date: str, iso 8601 formatted end date of period to query
                               params: dict, query parameters to set
 
+    :param session: SofarConnection object to use for the query
+
     :return: All data for that type for all Spotters in the queried period
     """
     worker_type, _ids, st_date, end_date, params = args
-    queries = [WaveDataQuery(_id, limit=500, start_date=st_date, end_date=end_date, params=params) for _id in _ids]
+    queries = [WaveDataQuery(_id, limit=500, start_date=st_date, end_date=end_date, params=params, custom_token=token) for _id in _ids]
 
     # grabbing data from all of the Spotters in parallel
     pool = ThreadPool(processes=16)
@@ -652,6 +654,7 @@ def _worker(data_type):
 
     :return: A helper function able to process a query for that specific data type
     """
+
     def _helper(data_query):
         st = data_query.start_date
         end = data_query.end_date
@@ -705,7 +708,7 @@ def _worker(data_type):
     return _helper
 
 
-def unpaginate( get_function, endpoint_suffix , params )->Dict:
+def unpaginate(get_function, endpoint_suffix, params) -> Dict:
     """
     Generator function to unpaginate a paginated request.
 
@@ -723,7 +726,7 @@ def unpaginate( get_function, endpoint_suffix , params )->Dict:
     """
     suffix = endpoint_suffix
     while True:
-        page = get_function( suffix, params)
+        page = get_function(suffix, params)
 
         for item in page['data']:
             yield item
