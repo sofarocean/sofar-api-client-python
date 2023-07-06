@@ -37,7 +37,10 @@ class SofarConnection:
     def __init__(self, custom_token=None):
         self._token = custom_token or get_token()
         self.endpoint = get_endpoint()
-        self.header = {'token': self._token, 'Content-Type': 'application/json'}
+
+    @property
+    def header(self):
+        return {'token': self._token, 'Content-Type': 'application/json'}
 
     # Helper methods
     def _get(self, endpoint_suffix, params: dict = None):
@@ -62,8 +65,15 @@ class SofarConnection:
 
         return status, data
 
-    def set_token(self, new_token):
+    def _set_token(self, new_token):
         self._token = new_token
-        self.header.update({'token': new_token})
+
+    @property
+    def token(self):
+        return self._token
+
+    @token.setter
+    def token(self, value):
+        self._set_token(value)
 
 

@@ -294,7 +294,7 @@ class Spotter:
 
         :return: Data as a json based on the given query paramters
         """
-        _query = WaveDataQuery(self.id, limit, start_date, end_date)
+        _query = WaveDataQuery(self.id, limit, start_date, end_date, custom_token=self._session.token)
         _query.waves(include_waves)
         _query.wind(include_wind)
         _query.track(include_track)
