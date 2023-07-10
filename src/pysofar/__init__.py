@@ -14,7 +14,11 @@ import json
 def get_token():
     # config values
     userpath = os.path.expanduser("~")
+
     environmentFile = os.path.join(userpath, 'sofar_api.env')
+    if not os.path.exists(environmentFile):
+        environmentFile = dotenv.find_dotenv()
+
     dotenv.load_dotenv(environmentFile)
     token = os.getenv('WF_API_TOKEN')
     _wavefleet_token = token
