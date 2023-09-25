@@ -393,7 +393,8 @@ class WaveDataQuery(SofarConnection):
             'includeFrequencyData': 'false',
             'includeDirectionalMoments': 'false',
             'includeSurfaceTempData': 'false',
-            'includeSpikes': 'false',            
+            'includeSpikes': 'false',
+            'processingSources': 'embedded',         
             'includeNonObs': 'false',
             'includeMicrophoneData': 'false',
             'includeBarometerData': 'false'
@@ -487,7 +488,6 @@ class WaveDataQuery(SofarConnection):
                      Please set includeFrequencyData to true with .frequency(True) if desired. \n""")
         self._params.update({'includeDirectionalMoments': str(include).lower()})
 
-
     def surface_temp(self, include: bool):
         """
 
@@ -501,6 +501,13 @@ class WaveDataQuery(SofarConnection):
         :param include: True if you want the query to include data points exceeding our spike filter
         """
         self._params.update({'includeSpikes': str(include).lower()})
+
+    def processing_sources(self, value: str):
+        """
+
+        :param value: string (embedded, hdr, all) to include HDR data (default: embedded only)
+        """
+        self._params.update({'processingSources': str(value).lower()})
 
     def smooth_wave_data(self, include: bool):
         """
@@ -568,7 +575,8 @@ class WaveDataQuery(SofarConnection):
             f"    microphone: {self._params['includeMicrophoneData']} \n" + \
             f"    track: {self._params['includeTrack']} \n" + \
             f"    frequency: {self._params['includeFrequencyData']} \n" + \
-            f"    directional_moments: {self._params['includeDirectionalMoments']} \n"
+            f"    directional_moments: {self._params['includeDirectionalMoments']} \n" + \
+            f"    processing_sources: {self._params['processingSources']} \n"
 
         return s
 
