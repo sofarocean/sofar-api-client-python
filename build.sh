@@ -21,7 +21,7 @@ testing() {
     # https://packaging.python.org/en/latest/guides/using-testpypi/
     #
     setup
-    # password is the API token located in 1Password: search for test.pypi.org
+    # password is an API token.  search for test.pypi.org in password repository
     twine upload --username __token__ --repository testpypi dist/*
     ${pip} install --index-url https://test.pypi.org/simple/ --no-deps --upgrade pysofar
 }
