@@ -3,7 +3,7 @@ This file is part of pysofar: A client for interfacing with Sofar Ocean's Spotte
 
 Contents: Classes used to connect to the Sofar API and return data
 
-Copyright 2019-2022
+Copyright 2019-2024
 Sofar Ocean Technologies
 
 Authors: Mike Sosa et al.
