@@ -13,7 +13,7 @@ from itertools import chain
 from multiprocessing.pool import ThreadPool
 from pysofar import SofarConnection
 from pysofar.tools import parse_date
-from pysofar.wavefleet_exceptions import QueryError, CouldNotRetrieveFile
+from pysofar.wavefleet_exceptions import QueryError
 from typing import List, Tuple, Dict
 import warnings
 
@@ -41,50 +41,6 @@ class SofarApi(SofarConnection):
         return self._device_radius()
 
     # ---------------------------------- Single Spotter Endpoints -------------------------------------- #
-    def grab_datafile(self, spotter_id: str, start_date: str, end_date: str):
-        """
-
-        :param spotter_id: The string id of the Spotter
-        :param start_date: ISO8601 formatted start date of the data
-        :param end_date: ISO8601 formatted end date of the data
-
-        :return: None if not completed, else the status of the file download
-        """
-        # TODO: If the generation of the file isn't instantaneous, will fail
-        #  TODO : Look into async.io for potential solution?
-        import urllib.request
-        import shutil
-
-        # QUERY to request the file
-        body = {
-            "spotterId": spotter_id,
-            "startDate": start_date,
-            "endDate": end_date
-        }
-
-        scode, response = self._post("history", body)
-
-        if scode != 200:
-            raise QueryError(f"{response['message']}")
-
-        file_id = response['data']['fileId']
-
-        # QUERY to download the requested file
-        scode, response = self._get(f"datafile/{file_id}")
-
-        status = response['fileStatus']
-        file_url = response['fileUrl']
-
-        if status != "complete":
-            raise CouldNotRetrieveFile(f"File creation not yet complete. Try {file_url} in a little bit")
-
-        # downloading the file
-        file_name = f"{spotter_id}_{start_date}_{end_date}"
-        with urllib.request.urlopen(file_url) as response, open(file_name, 'wb') as out_file:
-            shutil.copyfileobj(response, out_file)
-
-        return f"{file_name} downloaded successfully"
-
     def get_latest_data(self, spotter_id: str,
                         include_wind_data: bool = False,
                         include_directional_moments: bool = False,

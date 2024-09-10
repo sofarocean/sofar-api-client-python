@@ -16,9 +16,3 @@ class QueryError(Exception):
     """
     pass
 
-
-class CouldNotRetrieveFile(Exception):
-    """
-    Query raised when a requested datafile could not be retrieved.
-    """
-    pass
