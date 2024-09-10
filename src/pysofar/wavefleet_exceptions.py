@@ -15,3 +15,4 @@ class QueryError(Exception):
     Exception raised when a query to the wavefleet api fails.
     """
     pass
+
