@@ -170,16 +170,6 @@ class Spotter:
         """
         self.name = self._session.update_spotter_name(self.id, new_name)
 
-    def download_datafile(self, start_date, end_date):
-        """
-        Download a datafile container this Spotter's data from start_date to end_date
-
-        :param start_date: Start date string
-        :param end_date: End date String
-        """
-        from pysofar.tools import parse_date
-        self._session.grab_datafile(self.id, parse_date(start_date), parse_date(end_date))
-
     def update(self):
         """
         Updates this Spotter's attribute values.
