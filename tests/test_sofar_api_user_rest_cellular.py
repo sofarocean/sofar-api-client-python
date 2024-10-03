@@ -34,7 +34,7 @@ class UserRestDevicesTest(unittest.TestCase):
         """
         Guess that a Spotter ending in C might be a cellular Spotter
         
-        This is /not/ the best way of doing this.[A
+        This is /not/ the best way of doing this.
         """
         return next((spot_id for spot_id in self._device_ids if spot_id.endswith('C')), None)
         
