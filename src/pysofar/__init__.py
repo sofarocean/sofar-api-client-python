@@ -14,7 +14,11 @@ import json
 def get_token():
     # config values
     userpath = os.path.expanduser("~")
+
     environmentFile = os.path.join(userpath, 'sofar_api.env')
+    if not os.path.exists(environmentFile):
+        environmentFile = dotenv.find_dotenv()
+
     dotenv.load_dotenv(environmentFile)
     token = os.getenv('WF_API_TOKEN')
     _wavefleet_token = token
@@ -37,7 +41,10 @@ class SofarConnection:
     def __init__(self, custom_token=None):
         self._token = custom_token or get_token()
         self.endpoint = get_endpoint()
-        self.header = {'token': self._token, 'Content-Type': 'application/json'}
+
+    @property
+    def header(self):
+        return {'token': self.token, 'Content-Type': 'application/json'}
 
     # Helper methods
     def _get(self, endpoint_suffix, params: dict = None):
@@ -62,8 +69,15 @@ class SofarConnection:
 
         return status, data
 
-    def set_token(self, new_token):
+    def _set_token(self, new_token):
         self._token = new_token
-        self.header.update({'token': new_token})
+
+    @property
+    def token(self):
+        return self._token
+
+    @token.setter
+    def token(self, value):
+        self._set_token(value)
 
 
