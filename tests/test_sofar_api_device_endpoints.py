@@ -1,5 +1,5 @@
 """
-This file is part of pysofar: A client for interfacing with Sofar Oceans Spotter API
+This file is part of pysofar: A client for interfacing with Sofar Ocean's Spotter API
 
 Contents: Tests for device endpoints
 
