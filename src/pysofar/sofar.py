@@ -562,32 +562,43 @@ class CellularSignalMetricsQuery(SofarUserRestQuery):
     def __init__(self,
             spotter_id: str,
             limit: int = 20,
-            # start_epoch=_MISSING,
-            # end_epoch=_MISSING,
+            order_ascending: bool = False,
+            start_epoch_ms=_MISSING,
+            end_epoch_ms=_MISSING,
             params=None):
         super().__init__()
         self.spotter_id = spotter_id
         self._limit = limit
         self._params = {
-            'spotterId': spotter_id,
-            'limit': limit,
+            'spotterId'      : spotter_id,
+            'limit'          : limit,
+            'order_ascending': str(order_ascending).lower(),
         }
         if params:
             self._params.update(params)
 
-    def execute(self):
+        if start_epoch_ms and start_epoch_ms is not self._MISSING:
+            self._params.update({'since_epoch_ms': str(start_epoch_ms)})
+
+        if end_epoch_ms and end_epoch_ms is not self._MISSING:
+            self._params.update({'before_epoch_ms': str(end_epoch_ms)})
+
+    def execute(self, return_raw = False):
         """
         Calls the cellular-signal-metrics endpoint.
         If successful, returns the queried data with the set query parameters.
         
+        if return_raw is True, return the outer metadata structure of the response
+
         :return: Data as a dictionary
         """
+        print(self._params)
         scode, data = self._get(f"devices/{self.spotter_id}/cellular-signal-metrics", params=self._params)
 
         if scode != 200:
             raise QueryError(data['message'])
 
-        return data['data']
+        return data if return_raw else data['data']
 
 # ---------------------------------- Util Functions -------------------------------------- #
 def get_and_update_spotters(_api=None):
