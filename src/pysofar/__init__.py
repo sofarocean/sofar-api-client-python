@@ -44,7 +44,7 @@ class SofarConnection:
 
     @property
     def header(self):
-        return {'token': self._token, 'Content-Type': 'application/json'}
+        return {'token': self.token, 'Content-Type': 'application/json'}
 
     # Helper methods
     def _get(self, endpoint_suffix, params: dict = None):
