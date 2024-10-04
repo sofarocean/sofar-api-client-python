@@ -592,7 +592,6 @@ class CellularSignalMetricsQuery(SofarUserRestQuery):
 
         :return: Data as a dictionary
         """
-        print(self._params)
         scode, data = self._get(f"devices/{self.spotter_id}/cellular-signal-metrics", params=self._params)
 
         if scode != 200:

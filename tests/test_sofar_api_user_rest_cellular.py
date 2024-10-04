@@ -12,8 +12,13 @@ import json
 import unittest
 
 from pysofar.sofar import SofarApi, CellularSignalMetricsQuery
+from pysofar.spotter import Spotter
 
 class UserRestDevicesTest(unittest.TestCase):
+    def testCellularSignalMetricsFromSpotter(self):
+        spot = Spotter(self._cellular_id, self._cellular_id)
+        data = spot.grab_cellular_signal_metrics()
+        self.assertTrue(data)
 
     def testCellularSignalMetricsParameters(self):
         if not self._cellular_id:
@@ -57,11 +62,10 @@ class UserRestDevicesTest(unittest.TestCase):
 
         query = CellularSignalMetricsQuery(self._cellular_id)
         data = query.execute()
-        print(json.dumps(data[0], indent=2))
+        # print(json.dumps(data[0], indent=2))
 
     def setUp(self):
         self._api = SofarApi()
-        # dat = api.get_device_location_data()
         self._devices = self._api.devices
         self._device_ids = self._api.device_ids
         self._cellular_id = self._findPossibleCellularDevice()
