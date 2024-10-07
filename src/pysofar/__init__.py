@@ -28,7 +28,6 @@ def get_endpoint():
         _endpoint = 'https://api.sofarocean.com/api'
     return _endpoint
 
-
 class SofarConnection:
     """
     Base Parent class for connections to the API
@@ -42,14 +41,13 @@ class SofarConnection:
     # Helper methods
     def _get(self, endpoint_suffix, params: dict = None):
         url = f"{self.endpoint}/{endpoint_suffix}"
-
         if params is None:
             response = requests.get(url, headers=self.header)
         else:
             response = requests.get(url, headers=self.header, params=params)
 
         status = response.status_code
-        data = json.loads(response.text)
+        data = response.json()
 
         return status, data
 
@@ -58,12 +56,10 @@ class SofarConnection:
                                 json=json_data,
                                 headers=self.header)
         status = response.status_code
-        data = json.loads(response.text)
+        data = response.json()
 
         return status, data
 
     def set_token(self, new_token):
         self._token = new_token
         self.header.update({'token': new_token})
-
-

@@ -15,8 +15,9 @@ from pysofar import SofarConnection
 from pysofar.tools import parse_date
 from pysofar.wavefleet_exceptions import QueryError
 from typing import List, Tuple, Dict
-import warnings
 
+import os
+import warnings
 
 class SofarApi(SofarConnection):
     """
@@ -366,7 +367,8 @@ class WaveDataQuery(SofarConnection):
 
     def execute(self):
         """
-        Calls the api wave-data endpoint and if successful returns the queried data with the set query parameters
+        Calls the api wave-data endpoint.
+        If successful, returns the queried data with the set query parameters
 
         :return: Data as a dictionary
         """
@@ -536,6 +538,66 @@ class WaveDataQuery(SofarConnection):
 
         return s
 
+class SofarUserRestQuery(SofarConnection):
+    """
+    I represent a query against the /user-rest endpoint
+    """
+    @classmethod
+    def get_user_rest_endpoint(cls):
+        _endpoint = os.getenv('WF_USER_REST_URL')
+        if _endpoint is None:
+            _endpoint = 'https://api.sofarocean.com/user-rest'
+        return _endpoint
+
+    def __init__(self, custom_token=None):
+        super().__init__(custom_token)
+        self.endpoint = self.get_user_rest_endpoint()
+
+class CellularSignalMetricsQuery(SofarUserRestQuery):
+    """
+    I represent a query against the cellular-signal-metrics endpoint
+    """
+    _MISSING = object()
+
+    def __init__(self,
+            spotter_id: str,
+            limit: int = 20,
+            order_ascending: bool = False,
+            start_epoch_ms=_MISSING,
+            end_epoch_ms=_MISSING,
+            params=None):
+        super().__init__()
+        self.spotter_id = spotter_id
+        self._limit = limit
+        self._params = {
+            'spotterId'      : spotter_id,
+            'limit'          : limit,
+            'order_ascending': str(order_ascending).lower(),
+        }
+        if params:
+            self._params.update(params)
+
+        if start_epoch_ms and start_epoch_ms is not self._MISSING:
+            self._params.update({'since_epoch_ms': str(start_epoch_ms)})
+
+        if end_epoch_ms and end_epoch_ms is not self._MISSING:
+            self._params.update({'before_epoch_ms': str(end_epoch_ms)})
+
+    def execute(self, return_raw = False):
+        """
+        Calls the cellular-signal-metrics endpoint.
+        If successful, returns the queried data with the set query parameters.
+        
+        if return_raw is True, return the outer metadata structure of the response
+
+        :return: Data as a dictionary
+        """
+        scode, data = self._get(f"devices/{self.spotter_id}/cellular-signal-metrics", params=self._params)
+
+        if scode != 200:
+            raise QueryError(data['message'])
+
+        return data if return_raw else data['data']
 
 # ---------------------------------- Util Functions -------------------------------------- #
 def get_and_update_spotters(_api=None):

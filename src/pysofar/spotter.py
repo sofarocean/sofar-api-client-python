@@ -8,7 +8,7 @@ Sofar Ocean Technologies
 
 Authors: Mike Sosa et al.
 """
-from pysofar.sofar import SofarApi, WaveDataQuery
+from pysofar.sofar import SofarApi, WaveDataQuery, CellularSignalMetricsQuery
 
 
 # --------------------- Devices ----------------------------------------------#
@@ -292,7 +292,7 @@ class Spotter:
                                         identified as a potentially unwanted spike.
         :param processing_sources: Optional string for which processingSources to include (embedded, hdr, all)
 
-        :return: Data as a json based on the given query paramters
+        :return: Data as a json based on the given query parameters
         """
         _query = WaveDataQuery(self.id, limit, start_date, end_date)
         _query.waves(include_waves)
@@ -314,3 +314,31 @@ class Spotter:
         _data = _query.execute()
 
         return _data
+
+    def grab_cellular_signal_metrics(self, 
+        limit: int = 20,
+        order_ascending: bool = False,
+        start_epoch_ms: int = None,
+        end_epoch_ms: int = None):
+        """
+        Grabs and returns the cellular signal metrics (if available) for the given Spotter
+
+        :param limit: The limit for data to grab. Defaults to 20.
+        :param order_ascending: Return results in ascending order?
+        :param start_epoch_ms: Optional UTC epoch time (integer) at which to begin finding results
+        :param end_epoch_ms: Optional UTC epoch time (integer) at which to end finding results
+
+        :return: Data as a json based on the given query parameters
+        """
+
+        _query = CellularSignalMetricsQuery(
+            self.id,
+            limit=limit,
+            order_ascending=order_ascending,
+            start_epoch_ms=start_epoch_ms,
+            end_epoch_ms=end_epoch_ms,
+        )
+        _data = _query.execute()
+
+        return _data
+
