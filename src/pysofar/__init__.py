@@ -47,7 +47,6 @@ class SofarConnection:
             response = requests.get(url, headers=self.header, params=params)
 
         status = response.status_code
-        # data = json.loads(response.text)
         data = response.json()
 
         return status, data
@@ -57,7 +56,7 @@ class SofarConnection:
                                 json=json_data,
                                 headers=self.header)
         status = response.status_code
-        data = json.loads(response.text)
+        data = response.json()
 
         return status, data
 

@@ -62,7 +62,6 @@ class UserRestDevicesTest(unittest.TestCase):
 
         query = CellularSignalMetricsQuery(self._cellular_id)
         data = query.execute()
-        # print(json.dumps(data[0], indent=2))
 
     def setUp(self):
         self._api = SofarApi()
